@@ -4,12 +4,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPM Tracker</title>
+    <title>Guitar BPM Tracker</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <header>
+        <h1>Guitar Practice BPM Tracker</h1>
+        <p>Track each song part and keep your metronome in sync.</p>
+    </header>
 
-    <script src="main.js"> </script>
+    <main class="app-container">
+        <section class="sidebar">
+            <div class="section-header">
+                <h2>Songs</h2>
+                <button id="add-song-button" class="primary">Add Song</button>
+            </div>
+            <form id="song-form" class="inline-form hidden">
+                <input type="hidden" id="song-id">
+                <label>
+                    Name
+                    <input type="text" id="song-name" required>
+                </label>
+                <label>
+                    Notes
+                    <textarea id="song-notes" rows="2" placeholder="Optional"></textarea>
+                </label>
+                <div class="form-actions">
+                    <button type="submit" class="primary" id="save-song">Save</button>
+                    <button type="button" id="cancel-song">Cancel</button>
+                </div>
+            </form>
+            <ul id="song-list"></ul>
+        </section>
+
+        <section class="main-pane">
+            <section id="metronome">
+                <div class="section-header">
+                    <h2>Metronome</h2>
+                    <span id="active-part-label">No part selected</span>
+                </div>
+                <div class="metronome-controls">
+                    <button id="bpm-minus">-5</button>
+                    <input type="number" id="metronome-bpm" min="20" max="300" step="1" readonly>
+                    <button id="bpm-plus">+5</button>
+                    <button id="metronome-toggle" class="primary">Play</button>
+                </div>
+                <div id="metronome-indicator"></div>
+            </section>
+
+            <section id="song-details">
+                <div class="section-header">
+                    <div>
+                        <h2 id="detail-name">Select a song</h2>
+                        <p id="detail-notes" class="notes"></p>
+                    </div>
+                    <div class="section-actions">
+                        <button id="edit-song-button">Edit Song</button>
+                        <button id="delete-song-button" class="danger">Delete Song</button>
+                    </div>
+                </div>
+
+                <div class="parts-header">
+                    <h3>Parts</h3>
+                    <button id="add-part-button" class="primary">Add Part</button>
+                </div>
+                <form id="part-form" class="inline-form hidden">
+                    <input type="hidden" id="part-id">
+                    <label>
+                        Name
+                        <input type="text" id="part-name" required>
+                    </label>
+                    <div class="form-row">
+                        <label>
+                            Current BPM
+                            <input type="number" id="part-current-bpm" min="20" max="300" required>
+                        </label>
+                        <label>
+                            Target BPM
+                            <input type="number" id="part-target-bpm" min="20" max="300" required>
+                        </label>
+                    </div>
+                    <label>
+                        Comment
+                        <textarea id="part-comment" rows="2" placeholder="Optional thoughts"></textarea>
+                    </label>
+                    <div class="form-actions">
+                        <button type="submit" class="primary" id="save-part">Save Part</button>
+                        <button type="button" id="cancel-part">Cancel</button>
+                    </div>
+                </form>
+
+                <div id="part-list"></div>
+            </section>
+        </section>
+    </main>
+
+    <footer>
+        <small>Data saves locally in your browser.</small>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 
 </html>
