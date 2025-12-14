@@ -130,28 +130,34 @@
 
   function handlePartListClick(event) {
     const button = event.target.closest("button[data-action]");
-    if (!button) return;
-    const partId = button.dataset.partId;
     const song = getActiveSong();
     if (!song) return;
-    const part = song.parts.find((p) => p.id === partId);
-    if (!part) return;
 
-    switch (button.dataset.action) {
-      case "set":
-        activePartId = part.id;
-        updateMetronomeDisplay();
-        renderSongDetails();
-        break;
-      case "edit":
-        openPartForm(part);
-        break;
-      case "delete":
-        if (confirm(`Delete part "${part.name}"?`)) {
-          deletePart(part.id);
-        }
-        break;
+    if (button) {
+      const partId = button.dataset.partId;
+      const part = song.parts.find((p) => p.id === partId);
+      if (!part) return;
+
+      switch (button.dataset.action) {
+        case "edit":
+          openPartForm(part);
+          break;
+        case "delete":
+          if (confirm(`Delete part "${part.name}"?`)) {
+            deletePart(part.id);
+          }
+          break;
+      }
+      return;
     }
+
+    const item = event.target.closest(".part-item");
+    if (!item) return;
+    const part = song.parts.find((p) => p.id === item.dataset.id);
+    if (!part) return;
+    activePartId = part.id;
+    updateMetronomeDisplay();
+    renderSongDetails();
   }
 
   function handleAddSongButton() {
@@ -369,7 +375,9 @@
 
     song.parts.forEach((part) => {
       const partDiv = document.createElement("div");
-      partDiv.className = "part-item";
+      partDiv.className = `part-item${
+        part.id === activePartId ? " active" : ""
+      }`;
       partDiv.dataset.id = part.id;
 
       const progress = calculateProgress(part);
@@ -389,11 +397,11 @@
                         }
                     </div>
                     <div class="part-actions">
-                        <button data-action="set" data-part-id="${
-                          part.id
-                        }" class="primary">${
-        part.id === activePartId ? "Active" : "Set for Metronome"
-      }</button>
+                        ${
+                          part.id === activePartId
+                            ? `<span class="part-status">Active</span>`
+                            : ""
+                        }
                         <button data-action="edit" data-part-id="${
                           part.id
                         }">Edit</button>

@@ -323,6 +323,12 @@ button:disabled {
     gap: 0.5rem;
 }
 
+.part-item.active {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb33;
+    background: #eff6ff;
+}
+
 .part-header {
     display: flex;
     justify-content: space-between;
@@ -334,6 +340,16 @@ button:disabled {
     display: flex;
     gap: 0.35rem;
     flex-wrap: wrap;
+}
+
+.part-status {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 600;
+    border: 1px solid #bfdbfe;
 }
 
 .progress-section {
