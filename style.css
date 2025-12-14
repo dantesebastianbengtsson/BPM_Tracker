@@ -151,6 +151,13 @@ button.danger {
     color: #fff;
 }
 
+button:disabled {
+    background: #e5e7eb;
+    color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 .inline-form {
     background: #f1f5f9;
     border-radius: 8px;
@@ -362,6 +369,18 @@ button.danger {
 
 .progress-bar-fill.complete {
     background: #22c55e;
+}
+
+.progress-bar-fill.over-pink {
+    background: #ec4899;
+}
+
+.progress-bar-fill.over-red {
+    background: #ef4444;
+}
+
+.progress-bar-fill.over-purple {
+    background: #a855f7;
 }
 
 .notes {

@@ -267,11 +267,14 @@
     const comment = elements.partComment.value.trim();
     if (!name || !currentBpm || !targetBpm) return;
 
+    const maxBpm = targetBpm * 2;
+    const safeCurrentBpm = Math.min(currentBpm, maxBpm);
+
     if (partId) {
       const part = song.parts.find((p) => p.id === partId);
       if (part) {
         part.name = name;
-        part.currentBpm = currentBpm;
+        part.currentBpm = safeCurrentBpm;
         part.targetBpm = targetBpm;
         part.comment = comment;
       }
@@ -279,7 +282,7 @@
       const newPart = {
         id: generateId(),
         name,
-        currentBpm,
+        currentBpm: safeCurrentBpm,
         targetBpm,
         comment,
       };
@@ -433,15 +436,29 @@
 
   function calculateProgress(part) {
     if (!part.targetBpm) return 0;
-    return Math.min(part.currentBpm / part.targetBpm, 1);
+    return Math.min(part.currentBpm / part.targetBpm, 2);
   }
 
   function getProgressStatus(part) {
-    if (part.currentBpm >= part.targetBpm) {
-      return { label: "Final BPM reached", className: "complete" };
+    if (!part.targetBpm) return { label: "Set a target", className: "" };
+    const ratio = part.currentBpm / part.targetBpm;
+    if (ratio >= 2) {
+      return { label: "Maxed out (200%)", className: "over-purple" };
     }
-    if (part.currentBpm >= part.targetBpm * 0.5) {
-      return { label: "Halfway to target", className: "halfway" };
+    if (ratio >= 1.5) {
+      return { label: "Purple zone", className: "over-purple" };
+    }
+    if (ratio >= 1.25) {
+      return { label: "Redline", className: "over-red" };
+    }
+    if (ratio >= 1.01) {
+      return { label: "Above target", className: "over-pink" };
+    }
+    if (ratio >= 1) {
+      return { label: "Target smashed", className: "complete" };
+    }
+    if (ratio >= 0.5) {
+      return { label: "Woah, we're halfway there!", className: "halfway" };
     }
     return { label: "Keep practicing", className: "" };
   }
@@ -449,7 +466,8 @@
   function adjustPartBpm(delta) {
     const part = getActivePart();
     if (!part) return;
-    part.currentBpm = Math.max(20, part.currentBpm + delta);
+    const maxBpm = getMaxBpm(part);
+    part.currentBpm = Math.min(maxBpm, Math.max(20, part.currentBpm + delta));
     metronomeBpm = part.currentBpm;
     if (part.id === activePartId) {
       restartMetronomeInterval();
@@ -528,13 +546,15 @@
   function updateMetronomeDisplay() {
     const part = getActivePart();
     if (part) {
+      const maxBpm = getMaxBpm(part);
+      const atMax = part.currentBpm >= maxBpm;
       metronomeBpm = part.currentBpm;
       elements.metronomeBpm.value = part.currentBpm;
       elements.activePartLabel.textContent = `${getActiveSong().name} - ${
         part.name
       }`;
       elements.bpmMinus.disabled = false;
-      elements.bpmPlus.disabled = false;
+      elements.bpmPlus.disabled = atMax;
       elements.metronomeToggle.disabled = false;
       elements.metronomeToggle.textContent = isPlaying ? "Stop" : "Play";
       if (isPlaying) {
@@ -609,5 +629,10 @@
     return `id-${Date.now().toString(36)}-${Math.random()
       .toString(36)
       .slice(2, 7)}`;
+  }
+
+  function getMaxBpm(part) {
+    if (!part || !part.targetBpm) return 400;
+    return part.targetBpm * 2;
   }
 })();
