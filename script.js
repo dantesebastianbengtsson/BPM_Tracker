@@ -471,6 +471,9 @@
     metronomeBpm = part.currentBpm;
     if (part.id === activePartId) {
       restartMetronomeInterval();
+      if (isPlaying) {
+        handleTick(); // keep the light/click in phase after tempo changes
+      }
     }
     saveSongs();
     renderSongDetails();
