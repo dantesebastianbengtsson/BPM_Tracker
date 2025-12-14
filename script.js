@@ -42,6 +42,16 @@
     activePartLabel: document.getElementById("active-part-label"),
   };
 
+  function setSongButtonMode(mode) {
+    elements.addSongButton.textContent =
+      mode === "save" ? "Save Song" : "Add Song";
+  }
+
+  function setPartButtonMode(mode) {
+    elements.addPartButton.textContent =
+      mode === "save" ? "Save Part" : "Add Part";
+  }
+
   window.addEventListener("load", init);
 
   function init() {
@@ -60,7 +70,7 @@
   }
 
   function bindEvents() {
-    elements.addSongButton.addEventListener("click", () => openSongForm());
+    elements.addSongButton.addEventListener("click", handleAddSongButton);
     elements.cancelSong.addEventListener("click", closeSongForm);
     elements.songForm.addEventListener("submit", onSongSubmit);
 
@@ -78,7 +88,7 @@
       }
     });
 
-    elements.addPartButton.addEventListener("click", () => openPartForm());
+    elements.addPartButton.addEventListener("click", handleAddPartButton);
     elements.cancelPart.addEventListener("click", closePartForm);
     elements.partForm.addEventListener("submit", onPartSubmit);
     elements.partList.addEventListener("click", handlePartListClick);
@@ -144,18 +154,38 @@
     }
   }
 
+  function handleAddSongButton() {
+    const formOpen = !elements.songForm.classList.contains("hidden");
+    if (formOpen) {
+      elements.songForm.requestSubmit();
+    } else {
+      openSongForm();
+    }
+  }
+
+  function handleAddPartButton() {
+    const formOpen = !elements.partForm.classList.contains("hidden");
+    if (formOpen) {
+      elements.partForm.requestSubmit();
+    } else {
+      openPartForm();
+    }
+  }
+
   function openSongForm(song = null) {
     elements.songForm.classList.remove("hidden");
     elements.songName.value = song ? song.name : "";
     elements.songNotes.value = song ? song.notes || "" : "";
     elements.songId.value = song ? song.id : "";
     elements.songName.focus();
+    setSongButtonMode("save");
   }
 
   function closeSongForm() {
     elements.songForm.classList.add("hidden");
     elements.songForm.reset();
     elements.songId.value = "";
+    setSongButtonMode("add");
   }
 
   function onSongSubmit(event) {
@@ -216,12 +246,14 @@
     elements.partTarget.value = fallbackTarget;
     elements.partComment.value = part ? part.comment || "" : "";
     elements.partName.focus();
+    setPartButtonMode("save");
   }
 
   function closePartForm() {
     elements.partForm.classList.add("hidden");
     elements.partForm.reset();
     elements.partId.value = "";
+    setPartButtonMode("add");
   }
 
   function onPartSubmit(event) {
