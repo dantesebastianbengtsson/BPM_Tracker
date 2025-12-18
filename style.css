@@ -248,7 +248,33 @@ button:disabled {
     font-size: 0.8rem;
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
-    background: #e2e8f0;
+    background: #38bdf8;
+    color: #fff;
+}
+
+.progress-chip.halfway {
+    background: #f97316;
+    color: #fff;
+}
+
+.progress-chip.complete {
+    background: #22c55e;
+    color: #0f172a;
+}
+
+.progress-chip.over-pink {
+    background: #ec4899;
+    color: #fff;
+}
+
+.progress-chip.over-red {
+    background: #ef4444;
+    color: #fff;
+}
+
+.progress-chip.over-purple {
+    background: #a855f7;
+    color: #fff;
 }
 
 #metronome {
@@ -340,6 +366,7 @@ button:disabled {
     display: flex;
     gap: 0.35rem;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .part-status {
@@ -358,6 +385,10 @@ button:disabled {
     gap: 0.4rem;
 }
 
+.progress-section.locked {
+    opacity: 0.65;
+}
+
 .progress-label {
     font-size: 0.9rem;
     color: #475569;
@@ -365,6 +396,26 @@ button:disabled {
 
 .progress-status {
     font-weight: 600;
+}
+
+.progress-status.halfway {
+    color: #c2410c;
+}
+
+.progress-status.complete {
+    color: #15803d;
+}
+
+.progress-status.over-pink {
+    color: #db2777;
+}
+
+.progress-status.over-red {
+    color: #b91c1c;
+}
+
+.progress-status.over-purple {
+    color: #7c3aed;
 }
 
 .progress-bar {
@@ -399,6 +450,56 @@ button:disabled {
 
 .progress-bar-fill.over-purple {
     background: #a855f7;
+}
+
+.learning-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.learning-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.learning-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.learn-slider {
+    flex: 1;
+    min-width: 120px;
+    accent-color: #2563eb;
+}
+
+.part-learning {
+    display: inline-block;
+    padding: 0.3rem 0.5rem;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+
+.part-learning.ready {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.learn-hint {
+    margin: 0.2rem 0 0;
+    color: #9ca3af;
 }
 
 .notes {

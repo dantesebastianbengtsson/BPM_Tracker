@@ -32,6 +32,8 @@
     partName: document.getElementById("part-name"),
     partCurrent: document.getElementById("part-current-bpm"),
     partTarget: document.getElementById("part-target-bpm"),
+    partTotalBars: document.getElementById("part-total-bars"),
+    partLearntBars: document.getElementById("part-learnt-bars"),
     partComment: document.getElementById("part-comment"),
     cancelPart: document.getElementById("cancel-part"),
     metronomeBpm: document.getElementById("metronome-bpm"),
@@ -92,6 +94,7 @@
     elements.cancelPart.addEventListener("click", closePartForm);
     elements.partForm.addEventListener("submit", onPartSubmit);
     elements.partList.addEventListener("click", handlePartListClick);
+    elements.partList.addEventListener("input", handlePartListInput);
 
     elements.bpmMinus.addEventListener("click", () => adjustPartBpm(-5));
     elements.bpmPlus.addEventListener("click", () => adjustPartBpm(5));
@@ -139,6 +142,15 @@
       if (!part) return;
 
       switch (button.dataset.action) {
+        case "learn-up":
+          updateLearntBars(part.id, part.learntBars + 1);
+          break;
+        case "learn-down":
+          updateLearntBars(part.id, part.learntBars - 1);
+          break;
+        case "mark-learnt":
+          updateLearntBars(part.id, part.totalBars);
+          break;
         case "edit":
           openPartForm(part);
           break;
@@ -158,6 +170,20 @@
     activePartId = part.id;
     updateMetronomeDisplay();
     renderSongDetails();
+  }
+
+  function handlePartListInput(event) {
+    const slider = event.target.closest(".learn-slider");
+    const song = getActiveSong();
+    if (!slider || !song) return;
+    const partId = slider.dataset.partId;
+    const part = song.parts.find((p) => p.id === partId);
+    if (!part) return;
+    const nextValue = Math.min(
+      part.totalBars,
+      Math.max(0, Number(slider.value) || 0)
+    );
+    updateLearntBars(partId, nextValue);
   }
 
   function handleAddSongButton() {
@@ -248,8 +274,12 @@
       part?.currentBpm ?? (song.parts[song.parts.length - 1]?.currentBpm || 60);
     const fallbackTarget =
       part?.targetBpm ?? (song.parts[song.parts.length - 1]?.targetBpm || 80);
+    const totalBars = part?.totalBars ?? 8;
+    const learntBars = Math.min(totalBars, part?.learntBars ?? 0);
     elements.partCurrent.value = fallbackCurrent;
     elements.partTarget.value = fallbackTarget;
+    elements.partTotalBars.value = totalBars;
+    elements.partLearntBars.value = learntBars;
     elements.partComment.value = part ? part.comment || "" : "";
     elements.partName.focus();
     setPartButtonMode("save");
@@ -270,6 +300,12 @@
     const name = elements.partName.value.trim();
     const currentBpm = Number(elements.partCurrent.value);
     const targetBpm = Number(elements.partTarget.value);
+    const totalBars = Math.max(1, Number(elements.partTotalBars.value) || 1);
+    const rawLearntBars = Number(elements.partLearntBars.value);
+    const learntBars = Math.min(
+      totalBars,
+      Math.max(0, Number.isFinite(rawLearntBars) ? rawLearntBars : 0)
+    );
     const comment = elements.partComment.value.trim();
     if (!name || !currentBpm || !targetBpm) return;
 
@@ -282,6 +318,8 @@
         part.name = name;
         part.currentBpm = safeCurrentBpm;
         part.targetBpm = targetBpm;
+        part.totalBars = totalBars;
+        part.learntBars = learntBars;
         part.comment = comment;
       }
     } else {
@@ -290,6 +328,8 @@
         name,
         currentBpm: safeCurrentBpm,
         targetBpm,
+        totalBars,
+        learntBars,
         comment,
       };
       song.parts.push(newPart);
@@ -330,7 +370,8 @@
       }`;
       listItem.dataset.id = song.id;
 
-      const { percentage, label } = computeSongProgress(song);
+      const { percentage, label, className } = computeSongProgress(song);
+      const chipClass = className ? ` ${className}` : "";
 
       listItem.innerHTML = `
                 <div class="song-info">
@@ -338,7 +379,7 @@
                     <small>${label}</small>
                 </div>
                 <div class="song-row-actions">
-                    <span class="progress-chip">${percentage}%</span>
+                    <span class="progress-chip${chipClass}">${percentage}%</span>
                     <button data-action="edit" data-song-id="${song.id}">Edit</button>
                     <button data-action="delete" data-song-id="${song.id}" class="danger">Delete</button>
                 </div>
@@ -382,6 +423,9 @@
 
       const progress = calculateProgress(part);
       const status = getProgressStatus(part);
+      const learningPercent = Math.round(getLearningPercent(part) * 100);
+      const learningStatus = getLearningStatus(part);
+      const learned = isPartLearnt(part);
 
       partDiv.innerHTML = `
                 <div class="part-header">
@@ -402,6 +446,9 @@
                             ? `<span class="part-status">Active</span>`
                             : ""
                         }
+                        <span class="part-learning ${learned ? "ready" : ""}">
+                          ${learned ? "Learnt" : "Learning"}
+                        </span>
                         <button data-action="edit" data-part-id="${
                           part.id
                         }">Edit</button>
@@ -410,7 +457,49 @@
                         }" class="danger">Delete</button>
                     </div>
                 </div>
-                <div class="progress-section">
+                <div class="learning-section">
+                    <div class="learning-row">
+                        <span class="progress-label">Learnt ${
+                          part.learntBars
+                        } / ${part.totalBars} bars</span>
+                        <span class="progress-status ${
+                          learningStatus.className
+                        }">${learningPercent}% \u00b7 ${
+        learningStatus.label
+      }</span>
+                    </div>
+                    <div class="learning-controls">
+                        <button data-action="learn-down" data-part-id="${
+                          part.id
+                        }" ${part.learntBars <= 0 ? "disabled" : ""}>-</button>
+                        <input type="range" min="0" max="${
+                          part.totalBars
+                        }" step="1" value="${
+        part.learntBars
+      }" class="learn-slider" data-part-id="${part.id}">
+                        <button data-action="learn-up" data-part-id="${
+                          part.id
+                        }" ${
+        part.learntBars >= part.totalBars ? "disabled" : ""
+      }>+</button>
+                        <button data-action="mark-learnt" data-part-id="${
+                          part.id
+                        }" ${
+        part.learntBars >= part.totalBars ? "disabled" : ""
+      }>Mark learnt</button>
+                    </div>
+                    <div class="progress-bar learn">
+                        <div class="progress-bar-fill ${
+                          learningStatus.className
+                        }" style="width:${learningPercent}%"></div>
+                    </div>
+                    ${
+                      learned
+                        ? ""
+                        : `<p class="notes learn-hint">Finish learning this part to unlock BPM tracking.</p>`
+                    }
+                </div>
+                <div class="progress-section${learned ? "" : " locked"}">
                     <span class="progress-label">
                         ${Math.round(progress * 100)}% of target &middot;
                         <span class="progress-status">${status.label}</span>
@@ -429,16 +518,21 @@
 
   function computeSongProgress(song) {
     if (!song.parts.length) {
-      return { percentage: 0, label: "No parts yet" };
+      return { percentage: 0, label: "No parts yet", className: "" };
     }
     const total = song.parts.reduce(
       (sum, part) => sum + calculateProgress(part),
       0
     );
     const average = total / song.parts.length;
+    const tempoStatus = getTempoStatusFromRatio(average);
+    const learningRatio = getSongLearningProgress(song);
     return {
       percentage: Math.round(average * 100),
-      label: `${Math.round(average * 100)}% average progress`,
+      label: `${Math.round(average * 100)}% tempo avg \u00b7 ${Math.round(
+        learningRatio * 100
+      )}% learnt`,
+      className: tempoStatus.className,
     };
   }
 
@@ -450,6 +544,13 @@
   function getProgressStatus(part) {
     if (!part.targetBpm) return { label: "Set a target", className: "" };
     const ratio = part.currentBpm / part.targetBpm;
+    return getTempoStatusFromRatio(ratio);
+  }
+
+  function getTempoStatusFromRatio(ratio) {
+    if (!Number.isFinite(ratio)) {
+      return { label: "Keep practicing", className: "" };
+    }
     if (ratio >= 2) {
       return { label: "Maxed out (200%)", className: "over-purple" };
     }
@@ -471,9 +572,39 @@
     return { label: "Keep practicing", className: "" };
   }
 
+  function getLearningPercent(part) {
+    if (!part.totalBars) return 0;
+    return Math.min(1, Math.max(0, part.learntBars / part.totalBars));
+  }
+
+  function getLearningStatus(part) {
+    const ratio = getLearningPercent(part);
+    if (ratio >= 1) return { label: "Learnt", className: "complete" };
+    if (ratio >= 0.5) return { label: "Halfway", className: "halfway" };
+    return { label: "Learning", className: "" };
+  }
+
+  function isPartLearnt(part) {
+    return getLearningPercent(part) >= 1;
+  }
+
+  function getSongLearningProgress(song) {
+    if (!song.parts.length) return 0;
+    const totals = song.parts.reduce(
+      (acc, part) => {
+        acc.total += part.totalBars || 0;
+        acc.learnt += Math.min(part.learntBars || 0, part.totalBars || 0);
+        return acc;
+      },
+      { total: 0, learnt: 0 }
+    );
+    if (!totals.total) return 0;
+    return Math.min(1, totals.learnt / totals.total);
+  }
+
   function adjustPartBpm(delta) {
     const part = getActivePart();
-    if (!part) return;
+    if (!part || !isPartLearnt(part)) return;
     const maxBpm = getMaxBpm(part);
     part.currentBpm = Math.min(maxBpm, Math.max(20, part.currentBpm + delta));
     metronomeBpm = part.currentBpm;
@@ -489,8 +620,23 @@
     updateMetronomeDisplay();
   }
 
+  function updateLearntBars(partId, newValue) {
+    const song = getActiveSong();
+    if (!song) return;
+    const part = song.parts.find((p) => p.id === partId);
+    if (!part) return;
+    const normalized = normalizeLearntBars(part.totalBars, newValue);
+    if (part.learntBars === normalized) return;
+    part.learntBars = normalized;
+    saveSongs();
+    renderSongDetails();
+    renderSongList();
+    updateMetronomeDisplay();
+  }
+
   function toggleMetronome() {
-    if (!getActivePart()) return;
+    const part = getActivePart();
+    if (!part || !isPartLearnt(part)) return;
     isPlaying = !isPlaying;
     if (isPlaying) {
       startMetronome();
@@ -559,14 +705,19 @@
     if (part) {
       const maxBpm = getMaxBpm(part);
       const atMax = part.currentBpm >= maxBpm;
+      const unlocked = isPartLearnt(part);
+      if (!unlocked && isPlaying) {
+        isPlaying = false;
+        stopMetronome();
+      }
       metronomeBpm = part.currentBpm;
       elements.metronomeBpm.value = part.currentBpm;
       elements.activePartLabel.textContent = `${getActiveSong().name} - ${
         part.name
-      }`;
-      elements.bpmMinus.disabled = false;
-      elements.bpmPlus.disabled = atMax;
-      elements.metronomeToggle.disabled = false;
+      }${unlocked ? "" : " (learning bars)"}`;
+      elements.bpmMinus.disabled = !unlocked;
+      elements.bpmPlus.disabled = !unlocked || atMax;
+      elements.metronomeToggle.disabled = !unlocked;
       elements.metronomeToggle.textContent = isPlaying ? "Stop" : "Play";
       if (isPlaying) {
         restartMetronomeInterval();
@@ -599,19 +750,25 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(songs));
   }
 
+  function normalizeLearntBars(totalBars, learntBars) {
+    const total = Math.max(1, Number(totalBars) || 1);
+    const learnt = Number.isFinite(learntBars) ? learntBars : 0;
+    return Math.min(total, Math.max(0, Math.round(learnt)));
+  }
+
   function loadSongs() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          return parsed;
+          return normalizeSongs(parsed);
         }
       } catch (err) {
         console.error("Failed to parse songs from storage", err);
       }
     }
-    return [
+    return normalizeSongs([
       {
         id: generateId(),
         name: "Take Me Home, Country Roads",
@@ -622,6 +779,8 @@
             name: "Intro picking",
             currentBpm: 62,
             targetBpm: 82,
+            totalBars: 8,
+            learntBars: 8,
             comment: "Work on smooth transitions.",
           },
           {
@@ -629,11 +788,35 @@
             name: "Verse chords",
             currentBpm: 62,
             targetBpm: 82,
+            totalBars: 8,
+            learntBars: 6,
             comment: "",
           },
         ],
       },
-    ];
+    ]);
+  }
+
+  function normalizeSongs(list) {
+    return list.map((song) => ({
+      ...song,
+      parts: (song.parts || []).map(ensurePartDefaults),
+    }));
+  }
+
+  function ensurePartDefaults(part) {
+    const totalBars = Math.max(1, Number(part.totalBars) || 8);
+    const hasLearntValue =
+      part.learntBars !== undefined && part.learntBars !== null;
+    const learntBars = normalizeLearntBars(
+      totalBars,
+      hasLearntValue ? part.learntBars : totalBars
+    );
+    return {
+      ...part,
+      totalBars,
+      learntBars,
+    };
   }
 
   function generateId() {
