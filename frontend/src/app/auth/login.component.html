@@ -1,0 +1,18 @@
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>BPM Tracker</h1>
+    <form (ngSubmit)="submit()">
+      <input type="email" name="email" placeholder="Email" [(ngModel)]="email" required autocomplete="email" />
+      <input type="password" name="password" placeholder="Password" [(ngModel)]="password" required autocomplete="current-password" />
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+      <button type="submit" [disabled]="busy()">
+        {{ mode() === 'signin' ? 'Sign in' : 'Sign up' }}
+      </button>
+    </form>
+    <button class="link" type="button" (click)="toggle()">
+      {{ mode() === 'signin' ? 'Need an account? Sign up' : 'Have an account? Sign in' }}
+    </button>
+  </div>
+</div>

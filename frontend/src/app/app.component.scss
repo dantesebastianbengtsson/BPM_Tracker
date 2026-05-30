@@ -21,3 +21,16 @@
     > app-workspace { display: none; }
   }
 }
+
+.logout {
+  position: fixed;
+  top: 0.5rem;
+  right: 0.75rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: inherit;
+  cursor: pointer;
+  z-index: 10;
+}
