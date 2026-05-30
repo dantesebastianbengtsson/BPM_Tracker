@@ -1,0 +1,98 @@
+<aside class="rail">
+  <div class="rail-head">
+    <div class="brand">
+      <span class="brand-mark"><app-icon name="music" size="18" weight="1.6"></app-icon></span>
+      <div>
+        <p class="brand-name">BPM Tracker</p>
+        <p class="brand-sub">Practice ledger</p>
+      </div>
+    </div>
+  </div>
+
+  <nav class="rail-nav">
+    <button class="entry"
+            [class.active]="store.selectedFolderId() === ALL_SONGS"
+            (click)="store.selectFolder(ALL_SONGS)">
+      <span class="entry-icon"><app-icon name="layers" size="16"></app-icon></span>
+      <span class="entry-name">All songs</span>
+      <span class="entry-count">{{ totalCount() }}</span>
+    </button>
+    <button class="entry"
+            [class.active]="store.selectedFolderId() === UNFILED"
+            (click)="store.selectFolder(UNFILED)">
+      <span class="entry-icon"><app-icon name="archive" size="16"></app-icon></span>
+      <span class="entry-name">Unfiled</span>
+      <span class="entry-count">{{ unfiledCount() }}</span>
+    </button>
+  </nav>
+
+  <div class="rail-section">
+    <div class="rail-section-head">
+      <span class="rail-section-title">Folders</span>
+      <button class="rail-add" type="button" (click)="startCreate()" aria-label="New folder">
+        <app-icon name="plus" size="14" weight="2"></app-icon>
+      </button>
+    </div>
+
+    <ul class="folder-list">
+      @if (creating()) {
+        <li class="folder-row creating">
+          <span class="folder-row-icon"><app-icon name="folder" size="16"></app-icon></span>
+          <input id="new-folder-input"
+                 class="folder-input"
+                 [ngModel]="newName()"
+                 (ngModelChange)="newName.set($event)"
+                 (keydown.enter)="commitCreate()"
+                 (keydown.escape)="cancelCreate()"
+                 (blur)="commitCreate()"
+                 placeholder="Folder name…" />
+        </li>
+      }
+
+      @for (f of store.folders(); track f.id) {
+        <li class="folder-row"
+            [class.active]="store.selectedFolderId() === f.id"
+            (click)="store.selectFolder(f.id)">
+          <span class="folder-row-icon"><app-icon name="folder" size="16"></app-icon></span>
+
+          @if (editingId() === f.id) {
+            <input [id]="'edit-folder-' + f.id"
+                   class="folder-input"
+                   [ngModel]="editName()"
+                   (ngModelChange)="editName.set($event)"
+                   (keydown.enter)="commitEdit(f.id)"
+                   (keydown.escape)="cancelEdit()"
+                   (blur)="commitEdit(f.id)"
+                   (click)="$event.stopPropagation()" />
+          } @else {
+            <span class="folder-row-name">{{ f.name }}</span>
+
+            <span class="folder-row-actions">
+              <button type="button"
+                      class="row-action"
+                      (click)="startEdit(f.id, f.name, $event)"
+                      [attr.aria-label]="'Rename ' + f.name"
+                      title="Rename folder">
+                <app-icon name="edit" size="13"></app-icon>
+              </button>
+              <button type="button"
+                      class="row-action danger"
+                      (click)="remove(f.id, $event)"
+                      [attr.aria-label]="'Delete ' + f.name"
+                      title="Delete folder">
+                <app-icon name="trash" size="13"></app-icon>
+              </button>
+            </span>
+          }
+        </li>
+      }
+
+      @if (!creating() && store.folders().length === 0) {
+        <li class="folder-empty">
+          No folders yet.<br />
+          Use them to group songs — like "Summer set" or "The Strokes".
+        </li>
+      }
+    </ul>
+  </div>
+</aside>

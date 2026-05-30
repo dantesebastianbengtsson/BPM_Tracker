@@ -1,0 +1,86 @@
+// Design tokens — single source of truth for the visual system.
+
+:root {
+  // Surfaces
+  --bg-app: #0A0A0F;
+  --bg-rail: #0F0F16;
+  --bg-rail-hover: #161622;
+  --bg-canvas: #F6F5F2;
+  --bg-card: #FFFFFF;
+  --bg-card-elev: #FBFAF7;
+  --bg-subtle: #ECEAE5;
+
+  // Text
+  --text-strong: #0B0B12;
+  --text: #1F1F2A;
+  --text-muted: #6B6B7A;
+  --text-faint: #9C9CAA;
+  --text-on-dark: #F4F3EF;
+  --text-on-dark-muted: #8C8C9C;
+
+  // Lines & strokes
+  --line: rgba(11, 11, 18, 0.08);
+  --line-strong: rgba(11, 11, 18, 0.14);
+  --line-dark: rgba(255, 255, 255, 0.07);
+
+  // Accent — restrained violet, used sparingly for primary actions and the active beat
+  --accent: #7C5CFF;
+  --accent-hover: #6A48F2;
+  --accent-tint: rgba(124, 92, 255, 0.10);
+  --accent-tint-strong: rgba(124, 92, 255, 0.18);
+  --accent-on: #FFFFFF;
+
+  // Status (used for learnt-state pills + progress bar)
+  --status-unlearnt-bg: rgba(232, 116, 116, 0.10);
+  --status-unlearnt-fg: #9B3A3A;
+  --status-learning-bg: rgba(214, 158, 46, 0.12);
+  --status-learning-fg: #8B6314;
+  --status-learnt-bg: rgba(43, 153, 100, 0.12);
+  --status-learnt-fg: #1F6B45;
+
+  // Radii
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  // Shadow — quiet, used to lift interactive cards
+  --shadow-sm: 0 1px 2px rgba(11, 11, 18, 0.04), 0 1px 1px rgba(11, 11, 18, 0.03);
+  --shadow-md: 0 4px 16px rgba(11, 11, 18, 0.06), 0 1px 2px rgba(11, 11, 18, 0.04);
+  --shadow-lg: 0 24px 60px rgba(11, 11, 18, 0.10), 0 2px 6px rgba(11, 11, 18, 0.04);
+
+  // Type scale
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --text-xs: 0.72rem;
+  --text-sm: 0.82rem;
+  --text-base: 0.92rem;
+  --text-md: 1rem;
+  --text-lg: 1.15rem;
+  --text-xl: 1.45rem;
+  --text-2xl: 1.9rem;
+  --text-3xl: 2.6rem;
+  --text-4xl: clamp(3rem, 6vw, 4.4rem);
+
+  // Spacing scale (8px base)
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 72px;
+
+  // Motion
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 320ms;
+}

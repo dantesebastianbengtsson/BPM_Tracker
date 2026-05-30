@@ -1,0 +1,42 @@
+# Render blueprint: Spring Boot backend + free Postgres.
+# Deploy via Render dashboard -> New -> Blueprint -> pick this repo.
+databases:
+  - name: bpm-tracker-db
+    plan: free
+
+services:
+  - type: web
+    name: bpm-tracker-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/folders
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: PGHOST
+        fromDatabase:
+          name: bpm-tracker-db
+          property: host
+      - key: PGPORT
+        fromDatabase:
+          name: bpm-tracker-db
+          property: port
+      - key: PGDATABASE
+        fromDatabase:
+          name: bpm-tracker-db
+          property: database
+      - key: PGUSER
+        fromDatabase:
+          name: bpm-tracker-db
+          property: user
+      - key: PGPASSWORD
+        fromDatabase:
+          name: bpm-tracker-db
+          property: password
+      # Set this to your Vercel URL after the frontend is deployed
+      # (only needed if the browser ever calls the backend directly;
+      #  with the Vercel /api proxy rewrite, requests are same-origin).
+      - key: ALLOWED_ORIGINS
+        sync: false

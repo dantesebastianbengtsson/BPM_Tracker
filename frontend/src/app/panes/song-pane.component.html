@@ -1,0 +1,109 @@
+<section class="pane">
+  <header class="pane-head">
+    <div class="pane-head-text">
+      <p class="pane-eyebrow">Library</p>
+      <h2 class="pane-title">{{ headerLabel() }}</h2>
+    </div>
+    <button class="action"
+            type="button"
+            (click)="startCreate()"
+            [disabled]="!canCreate() && store.selectedFolderId() !== UNFILED">
+      <app-icon name="plus" size="14" weight="2"></app-icon>
+      <span>New song</span>
+    </button>
+  </header>
+
+  @if (!canCreate() && store.selectedFolderId() === ALL_SONGS) {
+    <p class="pane-hint">Pick a folder to create a song there, or add it under <strong>Unfiled</strong>.</p>
+  }
+
+  <ul class="song-list">
+    @if (creating()) {
+      <li class="song-card creating">
+        <input id="new-song-title"
+               class="song-title-input"
+               [ngModel]="newTitle()"
+               (ngModelChange)="newTitle.set($event)"
+               placeholder="Song title"
+               (keydown.enter)="commitCreate()"
+               (keydown.escape)="cancelCreate()" />
+        <div class="song-meta">
+          <label class="inline-field">
+            <span>Goal BPM</span>
+            <input type="number" min="20" max="260"
+                   [ngModel]="newBpm()"
+                   (ngModelChange)="newBpm.set($event)" />
+          </label>
+          <div class="card-actions">
+            <button class="ghost" type="button" (click)="cancelCreate()">Cancel</button>
+            <button class="primary" type="button" (click)="commitCreate()">Add song</button>
+          </div>
+        </div>
+      </li>
+    }
+
+    @for (s of store.visibleSongs(); track s.id) {
+      <li class="song-card"
+          [class.active]="store.selectedSongId() === s.id"
+          (click)="store.selectSong(s.id)">
+
+        @if (editingId() === s.id) {
+          <div class="edit-block" (click)="$event.stopPropagation()">
+            <input class="song-title-input"
+                   [ngModel]="editTitle()"
+                   (ngModelChange)="editTitle.set($event)"
+                   (keydown.enter)="commitEdit(s)"
+                   (keydown.escape)="cancelEdit()" />
+            <div class="song-meta">
+              <label class="inline-field">
+                <span>Goal BPM</span>
+                <input type="number" min="20" max="260"
+                       [ngModel]="editBpm()"
+                       (ngModelChange)="editBpm.set($event)" />
+              </label>
+              <div class="card-actions">
+                <button class="ghost" type="button" (click)="cancelEdit()">Cancel</button>
+                <button class="primary" type="button" (click)="commitEdit(s)">Save</button>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="song-head">
+            <div>
+              <p class="song-title">{{ s.title }}</p>
+              <p class="song-sub">
+                <span class="bpm-pill">{{ s.goalBpm }} BPM</span>
+                <span class="dot">·</span>
+                <span>{{ s.learntPartCount }}/{{ s.partCount }} parts learnt</span>
+              </p>
+            </div>
+            <div class="row-actions">
+              <button class="row-action" type="button" (click)="startEdit(s, $event)" aria-label="Edit song">
+                <app-icon name="edit" size="13"></app-icon>
+              </button>
+              <button class="row-action danger" type="button" (click)="remove(s.id, $event)" aria-label="Delete song">
+                <app-icon name="trash" size="13"></app-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="song-progress" [class.empty]="s.partCount === 0">
+            <span class="song-progress-bar" [style.--p]="progress(s)"></span>
+          </div>
+        }
+      </li>
+    }
+
+    @if (!store.visibleSongs().length && !creating()) {
+      <li class="empty-card">
+        <app-icon name="music" size="22" weight="1.4"></app-icon>
+        <p class="empty-title">No songs here yet</p>
+        <p class="empty-sub">Add one to start tracking parts and BPM.</p>
+        <button class="primary" type="button" (click)="startCreate()" [disabled]="!canCreate() && store.selectedFolderId() !== UNFILED">
+          <app-icon name="plus" size="14" weight="2"></app-icon>
+          <span>New song</span>
+        </button>
+      </li>
+    }
+  </ul>
+</section>

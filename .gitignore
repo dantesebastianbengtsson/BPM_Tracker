@@ -1,0 +1,18 @@
+# Build outputs
+backend/target/
+backend/data/
+backend/*.log
+frontend/dist/
+frontend/.angular/
+frontend/node_modules/
+frontend/*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local dev / tooling (not part of the app)
+.mcp.json
+*.stackdump
