@@ -1,5 +1,10 @@
-<div class="shell">
-  <app-folder-rail></app-folder-rail>
-  <app-song-pane></app-song-pane>
-  <app-workspace></app-workspace>
-</div>
+@if (auth.isAuthenticated()) {
+  <div class="shell">
+    <app-folder-rail></app-folder-rail>
+    <app-song-pane></app-song-pane>
+    <app-workspace></app-workspace>
+    <button class="logout" type="button" (click)="auth.signOut()">Log out</button>
+  </div>
+} @else {
+  <app-login></app-login>
+}
