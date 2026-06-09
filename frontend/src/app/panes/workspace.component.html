@@ -65,11 +65,7 @@
 
         @if (!store.parts().length && !creatingPart()) {
           <div class="empty-parts">
-            <p>No parts yet for this song.</p>
-            <button class="ghost" type="button" (click)="startCreatePart()">
-              <app-icon name="plus" size="14" weight="2"></app-icon>
-              <span>Add a part</span>
-            </button>
+            <p>No parts yet for this song. Use <strong>New part</strong> above to add one.</p>
           </div>
         }
       </aside>
@@ -197,11 +193,7 @@
           <div class="card placeholder-card">
             <app-icon name="music" size="22" weight="1.4"></app-icon>
             <p class="card-title">No part selected</p>
-            <p class="card-sub">Add the first part of <strong>{{ song()!.title }}</strong> to start tracking progress.</p>
-            <button class="primary" type="button" (click)="startCreatePart()">
-              <app-icon name="plus" size="14" weight="2"></app-icon>
-              <span>Add a part</span>
-            </button>
+            <p class="card-sub">Use <strong>New part</strong> above to add the first part of <strong>{{ song()!.title }}</strong>.</p>
           </div>
         </div>
       }

@@ -6,16 +6,11 @@
     </div>
     <button class="action"
             type="button"
-            (click)="startCreate()"
-            [disabled]="!canCreate() && store.selectedFolderId() !== UNFILED">
+            (click)="startCreate()">
       <app-icon name="plus" size="14" weight="2"></app-icon>
       <span>New song</span>
     </button>
   </header>
-
-  @if (!canCreate() && store.selectedFolderId() === ALL_SONGS) {
-    <p class="pane-hint">Pick a folder to create a song there, or add it under <strong>Unfiled</strong>.</p>
-  }
 
   <ul class="song-list">
     @if (creating()) {
@@ -98,11 +93,7 @@
       <li class="empty-card">
         <app-icon name="music" size="22" weight="1.4"></app-icon>
         <p class="empty-title">No songs here yet</p>
-        <p class="empty-sub">Add one to start tracking parts and BPM.</p>
-        <button class="primary" type="button" (click)="startCreate()" [disabled]="!canCreate() && store.selectedFolderId() !== UNFILED">
-          <app-icon name="plus" size="14" weight="2"></app-icon>
-          <span>New song</span>
-        </button>
+        <p class="empty-sub">Use <strong>New song</strong> above to add one.</p>
       </li>
     }
   </ul>

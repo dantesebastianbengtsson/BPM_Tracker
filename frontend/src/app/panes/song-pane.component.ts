@@ -14,9 +14,6 @@ import { Song } from '../core/models';
 })
 export class SongPaneComponent {
   protected store = inject(Store);
-  protected ALL_SONGS = ALL_SONGS;
-  protected UNFILED = UNFILED;
-
   protected creating = signal(false);
   protected newTitle = signal('');
   protected newBpm = signal(82);
@@ -32,8 +29,6 @@ export class SongPaneComponent {
     const f = this.store.folders().find(x => x.id === fid);
     return f?.name ?? 'Songs';
   });
-
-  protected canCreate = computed(() => this.store.selectedFolderId() !== ALL_SONGS);
 
   protected currentFolderId(): string | null {
     const fid = this.store.selectedFolderId();

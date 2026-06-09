@@ -46,7 +46,7 @@ export class WorkspaceComponent {
       const p = this.part();
       if (p) this.metronome.setBpm(p.workingBpm);
       else this.metronome.stop();
-    });
+    }, { allowSignalWrites: true });
   }
 
   startCreatePart() {

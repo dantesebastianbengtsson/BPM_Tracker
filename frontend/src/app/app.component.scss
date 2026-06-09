@@ -27,10 +27,18 @@
   top: 0.5rem;
   right: 0.75rem;
   padding: 0.35rem 0.7rem;
-  border-radius: 8px;
-  border: 1px solid #333;
-  background: #1a1a1a;
-  color: inherit;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   z-index: 10;
+
+  &:hover {
+    background: var(--bg-subtle);
+    color: var(--text-strong);
+  }
 }
