@@ -188,4 +188,16 @@ export class ApiService {
     if (error) throw error;
     return toPart(data as PartRow);
   }
+
+  setLearntBars(id: string, bars: number): Observable<Part> { return from(this.applyLearntBars(id, bars)); }
+  private async applyLearntBars(id: string, bars: number): Promise<Part> {
+    const { data: current, error: readErr } = await this.sb
+      .from('parts').select('total_bars').eq('id', id).single();
+    if (readErr) throw readErr;
+    const next = clampLearntBars(bars, (current as { total_bars: number }).total_bars);
+    const { data, error } = await this.sb
+      .from('parts').update({ learnt_bars: next }).eq('id', id).select().single();
+    if (error) throw error;
+    return toPart(data as PartRow);
+  }
 }

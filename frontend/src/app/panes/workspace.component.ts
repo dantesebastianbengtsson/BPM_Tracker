@@ -120,6 +120,35 @@ export class WorkspaceComponent {
     });
   }
 
+  // Tap tempo: BPM from the mean of the last few tap intervals.
+  private tapTimes: number[] = [];
+  protected tappedBpm = signal<number | null>(null);
+
+  async tapTempo() {
+    const now = performance.now();
+    const last = this.tapTimes[this.tapTimes.length - 1];
+    if (last !== undefined && now - last > 2000) this.tapTimes = [];
+    this.tapTimes.push(now);
+    if (this.tapTimes.length < 2) { this.tappedBpm.set(null); return; }
+    const recent = this.tapTimes.slice(-6);
+    const mean = (recent[recent.length - 1] - recent[0]) / (recent.length - 1);
+    const bpm = Math.max(20, Math.min(260, Math.round(60000 / mean)));
+    this.tappedBpm.set(bpm);
+    await this.setBpmInput(bpm);
+  }
+
+  async markAllLearnt() {
+    const p = this.part();
+    if (!p) return;
+    await this.store.setLearntBars(p.id, p.totalBars);
+  }
+
+  async resetLearnt() {
+    const p = this.part();
+    if (!p) return;
+    await this.store.setLearntBars(p.id, 0);
+  }
+
   async setBpmInput(v: number) {
     const p = this.part();
     if (!p) return;

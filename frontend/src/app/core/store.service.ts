@@ -18,13 +18,16 @@ export class Store {
   readonly selectedFolderId = signal<string>(ALL_SONGS);
   readonly selectedSongId = signal<string | null>(null);
   readonly selectedPartId = signal<string | null>(null);
+  readonly songQuery = signal('');
 
   readonly visibleSongs = computed(() => {
     const fid = this.selectedFolderId();
-    const all = this.songs();
-    if (fid === ALL_SONGS) return all;
-    if (fid === UNFILED) return all.filter(s => s.folderId === null);
-    return all.filter(s => s.folderId === fid);
+    let list = this.songs();
+    if (fid === UNFILED) list = list.filter(s => s.folderId === null);
+    else if (fid !== ALL_SONGS) list = list.filter(s => s.folderId === fid);
+    const q = this.songQuery().trim().toLowerCase();
+    if (q) list = list.filter(s => s.title.toLowerCase().includes(q));
+    return list;
   });
 
   readonly selectedSong = computed(() =>
@@ -126,6 +129,11 @@ export class Store {
   }
   async adjustBars(id: string, delta: number) {
     const p = await firstValueFrom(this.api.adjustBars(id, delta));
+    this.parts.update(list => list.map(x => x.id === id ? p : x));
+    this.refreshSongCountsFor(p.songId);
+  }
+  async setLearntBars(id: string, bars: number) {
+    const p = await firstValueFrom(this.api.setLearntBars(id, bars));
     this.parts.update(list => list.map(x => x.id === id ? p : x));
     this.refreshSongCountsFor(p.songId);
   }

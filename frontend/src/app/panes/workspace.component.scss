@@ -543,3 +543,34 @@
   .hero-bars, .hero-metronome, .hero-edit { grid-column: 1; }
   .workspace-body { grid-template-columns: 200px 1fr; }
 }
+
+.tempo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  .play-btn { flex: 1 1 auto; }
+}
+
+.hero > .card { min-width: 0; }
+
+.tap-btn {
+  all: unset;
+  cursor: pointer;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-card);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+
+  &:hover { background: var(--bg-subtle); color: var(--text-strong); }
+}
+
+.bars-quick {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}

@@ -112,6 +112,15 @@
                  p.learntBars >= p.totalBars ? 'All bars learnt — well done.' :
                  'Click + each time you nail another bar.' }}
             </p>
+
+            <div class="bars-quick">
+              @if (p.learntBars < p.totalBars) {
+                <button class="ghost" type="button" (click)="markAllLearnt()">Mark all learnt</button>
+              }
+              @if (p.learntBars > 0) {
+                <button class="ghost" type="button" (click)="resetLearnt()">Reset</button>
+              }
+            </div>
           </section>
 
           <section class="card hero-metronome">
@@ -133,13 +142,18 @@
               <button class="step" type="button" (click)="adjustBpm(5)" aria-label="Increase BPM by 5">+5</button>
             </div>
 
-            <button class="play-btn"
-                    type="button"
-                    [class.playing]="metronome.running()"
-                    (click)="toggleMetronome()">
-              <app-icon [name]="metronome.running() ? 'pause' : 'play'" size="18" weight="0"></app-icon>
-              <span>{{ metronome.running() ? 'Stop metronome' : 'Start metronome' }}</span>
-            </button>
+            <div class="tempo-actions">
+              <button class="play-btn"
+                      type="button"
+                      [class.playing]="metronome.running()"
+                      (click)="toggleMetronome()">
+                <app-icon [name]="metronome.running() ? 'pause' : 'play'" size="18" weight="0"></app-icon>
+                <span>{{ metronome.running() ? 'Stop metronome' : 'Start metronome' }}</span>
+              </button>
+              <button class="tap-btn" type="button" (click)="tapTempo()" aria-label="Tap tempo">
+                {{ tappedBpm() ? 'Tap · ' + tappedBpm() : 'Tap tempo' }}
+              </button>
+            </div>
 
             <p class="bpm-foot">Goal {{ song()!.goalBpm }} BPM
               · {{ p.workingBpm >= song()!.goalBpm ? 'At goal' : 'Below goal by ' + (song()!.goalBpm - p.workingBpm) + ' BPM' }}

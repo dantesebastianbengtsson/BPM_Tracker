@@ -12,6 +12,18 @@
     </button>
   </header>
 
+  <div class="search-row">
+    <input class="search-input"
+           type="search"
+           placeholder="Search songs"
+           aria-label="Search songs"
+           [ngModel]="store.songQuery()"
+           (ngModelChange)="store.songQuery.set($event)" />
+    @if (store.songQuery()) {
+      <button class="search-clear" type="button" (click)="store.songQuery.set('')" aria-label="Clear search">×</button>
+    }
+  </div>
+
   <ul class="song-list">
     @if (creating()) {
       <li class="song-card creating">
@@ -92,8 +104,13 @@
     @if (!store.visibleSongs().length && !creating()) {
       <li class="empty-card">
         <app-icon name="music" size="22" weight="1.4"></app-icon>
-        <p class="empty-title">No songs here yet</p>
-        <p class="empty-sub">Use <strong>New song</strong> above to add one.</p>
+        @if (store.songQuery()) {
+          <p class="empty-title">No songs match</p>
+          <p class="empty-sub">Try a different search, or clear it.</p>
+        } @else {
+          <p class="empty-title">No songs here yet</p>
+          <p class="empty-sub">Use <strong>New song</strong> above to add one.</p>
+        }
       </li>
     }
   </ul>
