@@ -6,7 +6,7 @@ import { LoginComponent } from './auth/login.component';
 import { IconComponent } from './ui/icon.component';
 import { Store } from './core/store.service';
 import { AuthService } from './core/auth.service';
-import { MetronomeSound, SettingsService, ThemeMode } from './core/settings.service';
+import { AccentColor, MetronomeSound, SettingsService, ThemeMode } from './core/settings.service';
 import { MetronomeService } from './core/metronome.service';
 
 @Component({
@@ -34,12 +34,20 @@ export class AppComponent {
     { value: 'wood', label: 'Wood' },
     { value: 'beep', label: 'Beep' },
   ];
-  protected accents = [
+  protected beats = [
     { value: 0, label: 'Off' },
     { value: 2, label: '2' },
     { value: 3, label: '3' },
     { value: 4, label: '4' },
     { value: 6, label: '6' },
+  ];
+  protected accentColors: { value: AccentColor; label: string; swatch: string }[] = [
+    { value: 'violet', label: 'Violet', swatch: '#7C5CFF' },
+    { value: 'blue', label: 'Blue', swatch: '#3B82F6' },
+    { value: 'teal', label: 'Teal', swatch: '#14B8A6' },
+    { value: 'green', label: 'Green', swatch: '#22A06B' },
+    { value: 'amber', label: 'Amber', swatch: '#D97706' },
+    { value: 'rose', label: 'Rose', swatch: '#DB2777' },
   ];
 
   constructor() {

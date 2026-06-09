@@ -140,3 +140,27 @@
   width: 100%;
   accent-color: var(--accent);
 }
+
+.swatches {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.swatch {
+  all: unset;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--swatch);
+  border: 2px solid transparent;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-fast);
+
+  &:hover { transform: scale(1.12); }
+
+  &.on {
+    border-color: var(--bg-card);
+    outline: 2px solid var(--swatch);
+  }
+}

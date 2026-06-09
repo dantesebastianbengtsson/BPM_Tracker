@@ -55,3 +55,17 @@ Extend `frontend/e2e-functional.mjs`: open options, switch to Dark and
 assert `data-theme` + canvas background change, pick Wood and assert
 persistence across reload, move volume slider, set accent. Existing Karma
 tests stay green.
+
+## Addendum (same day): pickable accent colors + dark-mode contrast fixes
+
+- **Accent colors** (user: something other than "vibe code purple"): six
+  palettes — Violet (default), Blue, Teal, Green, Amber, Rose — picked from
+  round swatches in Options. Applied via `data-accent` on `<html>`; each
+  accent defines only `--accent` and `--accent-hover`, tints derive via
+  `color-mix`. Persisted with the other settings.
+- **Dark-mode fixes**: "Start metronome" paired `--text-strong` background
+  with `--text-on-dark` text, which both resolve near-white in dark mode →
+  new `--btn-solid-*` tokens that invert with the theme. The parts list's
+  hardcoded `rgba(255,255,255,0.4)` veil became `--bg-inset` (subtle in
+  both themes). The song-pane progress gradient's hardcoded violet endpoint
+  now derives from the accent.

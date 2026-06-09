@@ -215,6 +215,14 @@ await step('dark theme applies to the page', async () => {
   if (theme !== 'dark') throw new Error(`data-theme is "${theme}"`);
   const bg = await page.locator('app-workspace').evaluate(el => getComputedStyle(el).backgroundColor);
   if (bg !== 'rgb(18, 18, 25)') throw new Error(`workspace canvas is ${bg}, expected dark`);
+  // regression: "Start metronome" must keep contrast in dark mode
+  const btn = await page.locator('.play-btn').evaluate(el => {
+    const cs = getComputedStyle(el);
+    return { fg: cs.color, bg: cs.backgroundColor };
+  });
+  if (btn.fg !== 'rgb(22, 22, 29)' || btn.bg !== 'rgb(242, 241, 247)') {
+    throw new Error(`play-btn is ${btn.fg} on ${btn.bg} in dark mode`);
+  }
 });
 
 await step('sound, volume and accent settings persist across reload', async () => {
@@ -233,8 +241,26 @@ await step('sound, volume and accent settings persist across reload', async () =
   if (theme !== 'dark') throw new Error(`theme after reload "${theme}"`);
 });
 
+await step('accent color is pickable and persists', async () => {
+  await page.click('.topbar-btn.gear');
+  await page.waitForSelector('.options-panel');
+  await page.locator('.swatch[title="Teal"]').click();
+  await page.waitForTimeout(300);
+  const accent = await page.evaluate(() => ({
+    attr: document.documentElement.getAttribute('data-accent'),
+    value: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+  }));
+  if (accent.attr !== 'teal') throw new Error(`data-accent is "${accent.attr}"`);
+  if (accent.value.toUpperCase() !== '#14B8A6') throw new Error(`--accent is "${accent.value}"`);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('bpm-tracker-settings')));
+  if (saved.accent !== 'teal') throw new Error(`persisted accent ${saved.accent}`);
+  await page.locator('.swatch[title="Violet"]').click();
+  await page.click('.options-close');
+});
+
 await step('switch back to light theme', async () => {
   await page.click('.topbar-btn.gear');
+  await page.waitForSelector('.options-panel');
   await page.locator('.options-panel .seg button', { hasText: 'Light' }).click();
   await page.waitForTimeout(300);
   const theme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
