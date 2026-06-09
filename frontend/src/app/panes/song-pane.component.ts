@@ -11,6 +11,7 @@ import { Song } from '../core/models';
   imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './song-pane.component.html',
   styleUrl: './song-pane.component.scss',
+  host: { '[class.collapsed]': 'collapsed()' },
 })
 export class SongPaneComponent {
   protected store = inject(Store);
@@ -21,6 +22,9 @@ export class SongPaneComponent {
   protected editingId = signal<string | null>(null);
   protected editTitle = signal('');
   protected editBpm = signal(82);
+
+  // Shrink to a strip once a song is chosen; CSS expands it on hover.
+  protected collapsed = computed(() => this.store.selectedSongId() !== null);
 
   protected headerLabel = computed(() => {
     const fid = this.store.selectedFolderId();

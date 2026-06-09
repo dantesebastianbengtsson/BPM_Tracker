@@ -13,19 +13,34 @@
           {{ part()?.title ?? 'Add a part to start' }}
         </h1>
       </div>
-      <div class="head-actions">
-        @if (part()) {
-          <span class="state-chip" [class]="stateClass(part()!)">{{ stateLabel() }}</span>
-        }
-        <button class="action" type="button" (click)="startCreatePart()">
-          <app-icon name="plus" size="14" weight="2"></app-icon>
-          <span>New part</span>
-        </button>
-      </div>
+      @if (part()) {
+        <span class="state-chip" [class]="stateClass(part()!)">{{ stateLabel() }}</span>
+      }
     </header>
 
     <div class="workspace-body">
       <aside class="parts-list">
+        @for (p of store.parts(); track p.id) {
+          <button class="part-card"
+                  type="button"
+                  [class.active]="store.selectedPartId() === p.id"
+                  (click)="selectPart(p.id)">
+            <span class="part-pill" [class]="stateClass(p)" aria-hidden="true"></span>
+            <span class="part-card-text">
+              <span class="part-card-title">{{ p.title }}</span>
+              <span class="part-card-sub">
+                {{ p.learntBars }}/{{ p.totalBars }} bars · {{ p.workingBpm }} BPM
+              </span>
+            </span>
+          </button>
+        }
+
+        @if (!store.parts().length && !creatingPart()) {
+          <div class="empty-parts">
+            <p>No parts yet for this song.</p>
+          </div>
+        }
+
         @if (creatingPart()) {
           <div class="part-card creating">
             <input id="new-part-title"
@@ -46,38 +61,18 @@
               <button class="primary" type="button" (click)="commitCreatePart()">Add</button>
             </div>
           </div>
-        }
-
-        @for (p of store.parts(); track p.id) {
-          <button class="part-card"
-                  type="button"
-                  [class.active]="store.selectedPartId() === p.id"
-                  (click)="selectPart(p.id)">
-            <span class="part-pill" [class]="stateClass(p)" aria-hidden="true"></span>
-            <span class="part-card-text">
-              <span class="part-card-title">{{ p.title }}</span>
-              <span class="part-card-sub">
-                {{ p.learntBars }}/{{ p.totalBars }} bars · {{ p.workingBpm }} BPM
-              </span>
-            </span>
+        } @else {
+          <button class="add-part" type="button" (click)="startCreatePart()">
+            <app-icon name="plus" size="14" weight="2"></app-icon>
+            <span>New part</span>
           </button>
-        }
-
-        @if (!store.parts().length && !creatingPart()) {
-          <div class="empty-parts">
-            <p>No parts yet for this song. Use <strong>New part</strong> above to add one.</p>
-          </div>
         }
       </aside>
 
       @if (part(); as p) {
         <div class="hero">
-
-          <section class="card hero-bars">
-            <div class="card-head">
-              <p class="card-eyebrow">Progress</p>
-              <p class="card-title">Bars learnt</p>
-            </div>
+          <section class="flow flow-bars">
+            <p class="flow-eyebrow">Bars learnt</p>
 
             <div class="bars-display">
               <button class="round-btn"
@@ -123,14 +118,13 @@
             </div>
           </section>
 
-          <section class="card hero-metronome">
-            <div class="card-head between">
-              <div>
-                <p class="card-eyebrow">Tempo</p>
-                <p class="card-title">Working BPM</p>
-              </div>
+          <div class="flow-divider" aria-hidden="true"></div>
+
+          <section class="flow flow-tempo">
+            <p class="flow-eyebrow">
+              <span>Working BPM</span>
               <span class="indicator" [class.active]="metronome.tickCount() % 2 === 1 && metronome.running()"></span>
-            </div>
+            </p>
 
             <div class="bpm-row">
               <button class="step" type="button" (click)="adjustBpm(-5)" aria-label="Decrease BPM by 5">−5</button>
@@ -160,12 +154,7 @@
             </p>
           </section>
 
-          <section class="card hero-edit">
-            <div class="card-head">
-              <p class="card-eyebrow">Part</p>
-              <p class="card-title">Details</p>
-            </div>
-
+          <section class="flow flow-meta">
             @if (editing()) {
               <div class="edit-grid">
                 <label class="stacked-field">
@@ -184,19 +173,14 @@
                 </div>
               </div>
             } @else {
-              <dl class="detail-grid">
-                <div><dt>Title</dt><dd>{{ p.title }}</dd></div>
-                <div><dt>Total bars</dt><dd>{{ p.totalBars }}</dd></div>
-                <div><dt>State</dt><dd>{{ stateLabel() }}</dd></div>
-              </dl>
-              <div class="card-actions">
+              <div class="meta-actions">
+                <button class="ghost" type="button" (click)="startEditPart()">
+                  <app-icon name="edit" size="13"></app-icon>
+                  <span>Edit part</span>
+                </button>
                 <button class="ghost danger" type="button" (click)="removePart()">
                   <app-icon name="trash" size="13"></app-icon>
                   <span>Delete part</span>
-                </button>
-                <button class="primary" type="button" (click)="startEditPart()">
-                  <app-icon name="edit" size="13"></app-icon>
-                  <span>Edit part</span>
                 </button>
               </div>
             }
@@ -204,11 +188,9 @@
         </div>
       } @else {
         <div class="hero hero-empty">
-          <div class="card placeholder-card">
-            <app-icon name="music" size="22" weight="1.4"></app-icon>
-            <p class="card-title">No part selected</p>
-            <p class="card-sub">Use <strong>New part</strong> above to add the first part of <strong>{{ song()!.title }}</strong>.</p>
-          </div>
+          <app-icon name="music" size="24" weight="1.4"></app-icon>
+          <p class="hero-empty-title">No part selected</p>
+          <p class="hero-empty-sub">Add the first part of <strong>{{ song()!.title }}</strong> from the list on the left.</p>
         </div>
       }
     </div>

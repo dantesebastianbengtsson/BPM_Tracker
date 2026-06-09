@@ -6,13 +6,13 @@
 
 .shell {
   display: grid;
-  grid-template-columns: 260px 360px 1fr;
+  grid-template-columns: 260px auto 1fr;
   height: 100vh;
   background: var(--bg-app);
 }
 
 @media (max-width: 1280px) {
-  .shell { grid-template-columns: 240px 320px 1fr; }
+  .shell { grid-template-columns: 240px auto 1fr; }
 }
 
 @media (max-width: 1024px) {

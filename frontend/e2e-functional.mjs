@@ -31,6 +31,12 @@ page.on('console', m => {
 
 console.log(`Running against ${BASE} as ${email}\n`);
 
+// The library collapses to a strip once a song is selected; hovering expands it.
+async function openLibrary() {
+  await page.hover('app-song-pane');
+  await page.waitForTimeout(650); // spring transition
+}
+
 await step('signup: fresh account lands in app', async () => {
   await page.goto(BASE, { waitUntil: 'networkidle' });
   await page.click('button.link'); // switch to signup
@@ -78,7 +84,7 @@ await step('song is auto-selected, workspace shows it', async () => {
 });
 
 await step('add first part', async () => {
-  await page.locator('.workspace .action').click();
+  await page.locator('.add-part').click();
   await page.fill('#new-part-title', 'Verse');
   await page.locator('.part-card.creating input[type="number"]').fill('16');
   await page.locator('.part-card.creating .primary').click();
@@ -93,7 +99,7 @@ await step('part hero appears with metronome controls', async () => {
 });
 
 await step('add second part via Enter key', async () => {
-  await page.locator('.workspace .action').click();
+  await page.locator('.add-part').click();
   await page.fill('#new-part-title', 'Chorus');
   await page.press('#new-part-title', 'Enter');
   await page.waitForFunction(
@@ -115,6 +121,7 @@ await step('adjust learnt bars up', async () => {
 await step('persists after reload (data round-trips Supabase)', async () => {
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('.logout', { timeout: 20000 });
+  await openLibrary();
   await page.waitForSelector('.song-card', { timeout: 8000 });
   await page.locator('.song-card').first().click();
   await page.waitForFunction(
@@ -144,6 +151,7 @@ await step('create folder and song inside it', async () => {
   await input.press('Enter');
   await page.waitForTimeout(800);
   await page.getByText('Practice Set').first().click();
+  await openLibrary();
   const btn = page.locator('app-song-pane .action');
   if (await btn.isDisabled()) throw new Error('New song disabled inside a folder');
   await btn.click();
@@ -155,6 +163,7 @@ await step('create folder and song inside it', async () => {
 await step('tap tempo sets working BPM near tapped rate', async () => {
   // go back to the song with parts
   await page.getByText('All songs').first().click();
+  await openLibrary();
   await page.locator('.song-card', { hasText: 'My First Song' }).first().click();
   await page.waitForSelector('.hero', { timeout: 8000 });
   const tap = page.locator('.tap-btn');
@@ -187,6 +196,7 @@ await step('reset returns learnt bars to 0', async () => {
 });
 
 await step('song search filters the library', async () => {
+  await openLibrary();
   await page.fill('.search-input', 'folder');
   await page.waitForTimeout(400);
   const titles = await page.locator('.song-card:not(.creating) .song-title').allTextContents();
@@ -278,6 +288,7 @@ await step('login again, data still there', async () => {
   await page.fill('input[name="password"]', password);
   await page.click('button[type="submit"]');
   await page.waitForSelector('.logout', { timeout: 20000 });
+  await openLibrary();
   await page.waitForSelector('.song-card', { timeout: 8000 });
 });
 

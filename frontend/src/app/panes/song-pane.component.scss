@@ -3,12 +3,63 @@
   height: 100%;
   border-right: 1px solid var(--line);
   background: var(--bg-canvas);
+  position: relative;
+  overflow: hidden;
+  width: 340px;
+  // springy collapse/expand
+  transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+:host(.collapsed:not(:hover)) {
+  width: 64px;
+
+  .pane { opacity: 0; pointer-events: none; }
+  .strip { opacity: 1; transition-delay: 0.15s; }
+}
+
+.strip {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-6) 0;
+  color: var(--text-muted);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s var(--ease-out);
+
+  .strip-title {
+    writing-mode: vertical-rl;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-strong);
+    letter-spacing: 0.02em;
+    max-height: 60vh;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  app-icon:last-child {
+    margin-top: auto;
+    transform: rotate(0deg);
+  }
+}
+
+@media (max-width: 1024px) {
+  :host, :host(.collapsed:not(:hover)) { width: auto; }
+  :host(.collapsed:not(:hover)) .pane { opacity: 1; pointer-events: auto; }
+  .strip { display: none; }
 }
 
 .pane {
   height: 100%;
+  min-width: 340px;
   display: flex;
   flex-direction: column;
+  transition: opacity 0.22s var(--ease-out);
 }
 
 .pane-head {
