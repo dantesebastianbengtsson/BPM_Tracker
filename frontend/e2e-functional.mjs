@@ -203,6 +203,45 @@ await step('song search filters the library', async () => {
   if (after < 2) throw new Error(`expected all songs back after clear, got ${after}`);
 });
 
+await step('options panel opens via gear button', async () => {
+  await page.click('.topbar-btn.gear');
+  await page.waitForSelector('.options-panel', { timeout: 5000 });
+});
+
+await step('dark theme applies to the page', async () => {
+  await page.locator('.options-panel .seg button', { hasText: 'Dark' }).click();
+  await page.waitForTimeout(300);
+  const theme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  if (theme !== 'dark') throw new Error(`data-theme is "${theme}"`);
+  const bg = await page.locator('app-workspace').evaluate(el => getComputedStyle(el).backgroundColor);
+  if (bg !== 'rgb(18, 18, 25)') throw new Error(`workspace canvas is ${bg}, expected dark`);
+});
+
+await step('sound, volume and accent settings persist across reload', async () => {
+  await page.locator('.options-panel .seg button', { hasText: 'Wood' }).click();
+  await page.locator('.opt-group', { hasText: 'Accent' }).locator('button', { hasText: '4' }).click();
+  await page.locator('.volume').fill('30');
+  await page.waitForTimeout(300);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('.logout', { timeout: 20000 });
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('bpm-tracker-settings')));
+  if (saved.theme !== 'dark') throw new Error(`persisted theme ${saved.theme}`);
+  if (saved.sound !== 'wood') throw new Error(`persisted sound ${saved.sound}`);
+  if (saved.beatsPerBar !== 4) throw new Error(`persisted beatsPerBar ${saved.beatsPerBar}`);
+  if (Math.abs(saved.volume - 0.3) > 0.001) throw new Error(`persisted volume ${saved.volume}`);
+  const theme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  if (theme !== 'dark') throw new Error(`theme after reload "${theme}"`);
+});
+
+await step('switch back to light theme', async () => {
+  await page.click('.topbar-btn.gear');
+  await page.locator('.options-panel .seg button', { hasText: 'Light' }).click();
+  await page.waitForTimeout(300);
+  const theme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  if (theme !== 'light') throw new Error(`data-theme is "${theme}"`);
+  await page.click('.options-close');
+});
+
 await step('logout returns to login screen', async () => {
   await page.click('.logout');
   await page.waitForSelector('input[name="email"]', { timeout: 10000 });

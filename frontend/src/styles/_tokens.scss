@@ -9,6 +9,7 @@
   --bg-card: #FFFFFF;
   --bg-card-elev: #FBFAF7;
   --bg-subtle: #ECEAE5;
+  --bg-subtle-hover: #DEDBD3;
 
   // Text
   --text-strong: #0B0B12;
@@ -83,4 +84,41 @@
   --dur-fast: 120ms;
   --dur-base: 180ms;
   --dur-slow: 320ms;
+}
+
+:root {
+  color-scheme: light;
+}
+
+// Dark theme — same violet accent and dark rail; surfaces and text invert.
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-canvas: #121219;
+  --bg-card: #1A1A24;
+  --bg-card-elev: #1F1F2B;
+  --bg-subtle: #262634;
+  --bg-subtle-hover: #30303F;
+
+  --text-strong: #F2F1F7;
+  --text: #D8D7E2;
+  --text-muted: #9696A8;
+  --text-faint: #6C6C7E;
+
+  --line: rgba(244, 243, 239, 0.07);
+  --line-strong: rgba(244, 243, 239, 0.15);
+
+  --accent-tint: rgba(124, 92, 255, 0.16);
+  --accent-tint-strong: rgba(124, 92, 255, 0.26);
+
+  --status-unlearnt-bg: rgba(232, 116, 116, 0.16);
+  --status-unlearnt-fg: #E08A8A;
+  --status-learning-bg: rgba(214, 158, 46, 0.18);
+  --status-learning-fg: #D7AC56;
+  --status-learnt-bg: rgba(43, 153, 100, 0.18);
+  --status-learnt-fg: #5BBE8D;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45), 0 1px 1px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35);
 }

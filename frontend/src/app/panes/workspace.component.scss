@@ -283,7 +283,7 @@
   cursor: pointer;
   transition: background var(--dur-fast), transform var(--dur-fast), box-shadow var(--dur-fast);
 
-  &:hover { background: #DEDBD3; }
+  &:hover { background: var(--bg-subtle-hover); }
   &:active { transform: scale(0.96); }
 
   &.primary {
@@ -388,7 +388,7 @@
   font-variant-numeric: tabular-nums;
   transition: background var(--dur-fast);
 
-  &:hover { background: #DEDBD3; }
+  &:hover { background: var(--bg-subtle-hover); }
 }
 
 .bpm-input {

@@ -3,7 +3,71 @@
     <app-folder-rail></app-folder-rail>
     <app-song-pane></app-song-pane>
     <app-workspace></app-workspace>
-    <button class="logout" type="button" (click)="auth.signOut()">Log out</button>
+
+    <div class="topbar">
+      <button class="topbar-btn gear"
+              type="button"
+              (click)="settingsOpen.set(!settingsOpen())"
+              aria-label="Options">
+        <app-icon name="gear" size="15" weight="1.8"></app-icon>
+      </button>
+      <button class="topbar-btn logout" type="button" (click)="auth.signOut()">Log out</button>
+    </div>
+
+    @if (settingsOpen()) {
+      <aside class="options-panel" aria-label="Options">
+        <header class="options-head">
+          <p>Options</p>
+          <button class="options-close" type="button" (click)="settingsOpen.set(false)" aria-label="Close options">
+            <app-icon name="close" size="14" weight="2"></app-icon>
+          </button>
+        </header>
+
+        <div class="opt-group">
+          <p class="opt-label">Theme</p>
+          <div class="seg">
+            @for (t of themes; track t.value) {
+              <button type="button"
+                      [class.on]="settings.theme() === t.value"
+                      (click)="settings.theme.set(t.value)">{{ t.label }}</button>
+            }
+          </div>
+        </div>
+
+        <div class="opt-group">
+          <p class="opt-label">Metronome sound</p>
+          <div class="seg">
+            @for (s of sounds; track s.value) {
+              <button type="button"
+                      [class.on]="settings.sound() === s.value"
+                      (click)="setSound(s.value)">{{ s.label }}</button>
+            }
+          </div>
+        </div>
+
+        <div class="opt-group">
+          <p class="opt-label">Volume</p>
+          <input class="volume"
+                 type="range" min="0" max="100" step="5"
+                 [value]="settings.volume() * 100"
+                 (input)="setVolume($any($event.target).value)"
+                 (change)="previewVolume()"
+                 aria-label="Metronome volume" />
+        </div>
+
+        <div class="opt-group">
+          <p class="opt-label">Accent every</p>
+          <div class="seg">
+            @for (a of accents; track a.value) {
+              <button type="button"
+                      [class.on]="settings.beatsPerBar() === a.value"
+                      (click)="settings.beatsPerBar.set(a.value)">{{ a.label }}</button>
+            }
+          </div>
+          <p class="opt-hint">Beats — the first beat of each group is emphasised.</p>
+        </div>
+      </aside>
+    }
   </div>
 } @else {
   <app-login></app-login>
