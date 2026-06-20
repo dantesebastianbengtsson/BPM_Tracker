@@ -10,7 +10,10 @@ export interface Folder {
 export interface Song {
   id: string;
   title: string;
-  goalBpm: number;
+  artist: string | null;
+  album: string | null;
+  key: string | null;
+  avgBpm: number | null;
   folderId: string | null;
   position: number;
   partCount: number;
@@ -21,6 +24,7 @@ export interface Part {
   id: string;
   songId: string;
   title: string;
+  goalBpm: number;
   workingBpm: number;
   totalBars: number;
   learntBars: number;
@@ -34,12 +38,15 @@ export interface FolderUpsert {
 
 export interface SongUpsert {
   title: string;
-  goalBpm: number;
+  artist: string | null;
+  album: string | null;
+  key: string | null;
   folderId: string | null;
 }
 
 export interface PartUpsert {
   title: string;
+  goalBpm: number;
   workingBpm: number;
   totalBars: number;
 }
