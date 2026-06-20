@@ -17,13 +17,16 @@ export class SongPaneComponent {
   protected store = inject(Store);
   protected creating = signal(false);
   protected newTitle = signal('');
-  protected newBpm = signal(82);
+  protected newArtist = signal('');
+  protected newAlbum = signal('');
+  protected newKey = signal('');
 
   protected editingId = signal<string | null>(null);
   protected editTitle = signal('');
-  protected editBpm = signal(82);
+  protected editArtist = signal('');
+  protected editAlbum = signal('');
+  protected editKey = signal('');
 
-  // Shrink to a strip once a song is chosen; CSS expands it on hover.
   protected collapsed = computed(() => this.store.selectedSongId() !== null);
 
   protected headerLabel = computed(() => {
@@ -43,7 +46,9 @@ export class SongPaneComponent {
   startCreate() {
     this.creating.set(true);
     this.newTitle.set('');
-    this.newBpm.set(82);
+    this.newArtist.set('');
+    this.newAlbum.set('');
+    this.newKey.set('');
     queueMicrotask(() => document.getElementById('new-song-title')?.focus());
   }
   cancelCreate() { this.creating.set(false); }
@@ -52,7 +57,9 @@ export class SongPaneComponent {
     if (!title) { this.cancelCreate(); return; }
     await this.store.createSong({
       title,
-      goalBpm: this.newBpm() || 82,
+      artist: this.newArtist().trim() || null,
+      album: this.newAlbum().trim() || null,
+      key: this.newKey().trim() || null,
       folderId: this.currentFolderId(),
     });
     this.cancelCreate();
@@ -62,7 +69,9 @@ export class SongPaneComponent {
     ev.stopPropagation();
     this.editingId.set(s.id);
     this.editTitle.set(s.title);
-    this.editBpm.set(s.goalBpm);
+    this.editArtist.set(s.artist ?? '');
+    this.editAlbum.set(s.album ?? '');
+    this.editKey.set(s.key ?? '');
   }
   cancelEdit() { this.editingId.set(null); }
   async commitEdit(s: Song) {
@@ -70,7 +79,9 @@ export class SongPaneComponent {
     if (!title) { this.cancelEdit(); return; }
     await this.store.updateSong(s.id, {
       title,
-      goalBpm: this.editBpm() || s.goalBpm,
+      artist: this.editArtist().trim() || null,
+      album: this.editAlbum().trim() || null,
+      key: this.editKey().trim() || null,
       folderId: s.folderId,
     });
     this.cancelEdit();

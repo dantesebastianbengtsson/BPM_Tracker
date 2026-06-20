@@ -373,3 +373,69 @@
 
   &:hover { color: var(--text-strong); }
 }
+
+.song-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.song-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.song-artist {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.song-key {
+  margin: 0 0 2px;
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.song-fields {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field-row {
+  display: flex;
+  gap: var(--space-2);
+
+  .text-field { flex: 1; }
+  .key-field { flex: 0 0 72px; }
+}
+
+.text-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xs);
+    color: var(--text-strong);
+    font-size: var(--text-sm);
+    background: var(--bg-canvas);
+
+    &:focus { outline: none; border-color: var(--accent); }
+  }
+}

@@ -40,12 +40,26 @@
                placeholder="Song title"
                (keydown.enter)="commitCreate()"
                (keydown.escape)="cancelCreate()" />
-        <div class="song-meta">
-          <label class="inline-field">
-            <span>Goal BPM</span>
-            <input type="number" min="20" max="260"
-                   [ngModel]="newBpm()"
-                   (ngModelChange)="newBpm.set($event)" />
+        <div class="song-fields">
+          <div class="field-row">
+            <label class="text-field">
+              <span>Artist</span>
+              <input type="text"
+                     [ngModel]="newArtist()"
+                     (ngModelChange)="newArtist.set($event)" />
+            </label>
+            <label class="text-field key-field">
+              <span>Key</span>
+              <input type="text" maxlength="8"
+                     [ngModel]="newKey()"
+                     (ngModelChange)="newKey.set($event)" />
+            </label>
+          </div>
+          <label class="text-field">
+            <span>Album</span>
+            <input type="text"
+                   [ngModel]="newAlbum()"
+                   (ngModelChange)="newAlbum.set($event)" />
           </label>
           <div class="card-actions">
             <button class="ghost" type="button" (click)="cancelCreate()">Cancel</button>
@@ -67,12 +81,26 @@
                    (ngModelChange)="editTitle.set($event)"
                    (keydown.enter)="commitEdit(s)"
                    (keydown.escape)="cancelEdit()" />
-            <div class="song-meta">
-              <label class="inline-field">
-                <span>Goal BPM</span>
-                <input type="number" min="20" max="260"
-                       [ngModel]="editBpm()"
-                       (ngModelChange)="editBpm.set($event)" />
+            <div class="song-fields">
+              <div class="field-row">
+                <label class="text-field">
+                  <span>Artist</span>
+                  <input type="text"
+                         [ngModel]="editArtist()"
+                         (ngModelChange)="editArtist.set($event)" />
+                </label>
+                <label class="text-field key-field">
+                  <span>Key</span>
+                  <input type="text" maxlength="8"
+                         [ngModel]="editKey()"
+                         (ngModelChange)="editKey.set($event)" />
+                </label>
+              </div>
+              <label class="text-field">
+                <span>Album</span>
+                <input type="text"
+                       [ngModel]="editAlbum()"
+                       (ngModelChange)="editAlbum.set($event)" />
               </label>
               <div class="card-actions">
                 <button class="ghost" type="button" (click)="cancelEdit()">Cancel</button>
@@ -82,10 +110,18 @@
           </div>
         } @else {
           <div class="song-head">
-            <div>
-              <p class="song-title">{{ s.title }}</p>
+            <div class="song-info">
+              <div class="song-title-row">
+                <p class="song-title">{{ s.title }}</p>
+                @if (s.artist) {
+                  <span class="song-artist">{{ s.artist }}</span>
+                }
+              </div>
+              @if (s.key) {
+                <p class="song-key">{{ s.key }}</p>
+              }
               <p class="song-sub">
-                <span class="bpm-pill">{{ s.goalBpm }} BPM</span>
+                <span class="bpm-pill">{{ s.avgBpm !== null ? s.avgBpm + ' BPM' : '— BPM' }}</span>
                 <span class="dot">·</span>
                 <span>{{ s.learntPartCount }}/{{ s.partCount }} parts learnt</span>
               </p>
