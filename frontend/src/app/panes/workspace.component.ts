@@ -23,10 +23,12 @@ export class WorkspaceComponent {
   protected creatingPart = signal(false);
   protected newPartTitle = signal('');
   protected newPartBars = signal(1);
+  protected newPartGoalBpm = signal(80);
 
   protected editing = signal(false);
   protected editTitle = signal('');
   protected editTotal = signal(1);
+  protected editGoalBpm = signal(80);
 
   protected progress = computed(() => {
     const p = this.part();
@@ -41,7 +43,6 @@ export class WorkspaceComponent {
   });
 
   constructor() {
-    // Sync metronome BPM to active part.
     effect(() => {
       const p = this.part();
       if (p) this.metronome.setBpm(p.workingBpm);
@@ -53,6 +54,7 @@ export class WorkspaceComponent {
     this.creatingPart.set(true);
     this.newPartTitle.set('');
     this.newPartBars.set(1);
+    this.newPartGoalBpm.set(80);
     queueMicrotask(() => document.getElementById('new-part-title')?.focus());
   }
   cancelCreatePart() { this.creatingPart.set(false); }
@@ -61,9 +63,11 @@ export class WorkspaceComponent {
     if (!song) return;
     const title = this.newPartTitle().trim();
     if (!title) { this.cancelCreatePart(); return; }
+    const goalBpm = Math.max(20, Math.min(260, this.newPartGoalBpm() || 80));
     await this.store.createPart(song.id, {
       title,
-      workingBpm: song.goalBpm,
+      goalBpm,
+      workingBpm: goalBpm,
       totalBars: Math.max(1, this.newPartBars() || 1),
     });
     this.cancelCreatePart();
@@ -75,6 +79,7 @@ export class WorkspaceComponent {
     this.editing.set(true);
     this.editTitle.set(p.title);
     this.editTotal.set(p.totalBars);
+    this.editGoalBpm.set(p.goalBpm);
   }
   cancelEditPart() { this.editing.set(false); }
   async commitEditPart() {
@@ -84,6 +89,7 @@ export class WorkspaceComponent {
     if (!title) { this.editing.set(false); return; }
     await this.store.updatePart(p.id, {
       title,
+      goalBpm: Math.max(20, Math.min(260, this.editGoalBpm() || p.goalBpm)),
       workingBpm: p.workingBpm,
       totalBars: Math.max(1, this.editTotal() || 1),
     });
@@ -115,12 +121,12 @@ export class WorkspaceComponent {
     const next = Math.max(20, Math.min(260, p.workingBpm + delta));
     await this.store.updatePart(p.id, {
       title: p.title,
+      goalBpm: p.goalBpm,
       workingBpm: next,
       totalBars: p.totalBars,
     });
   }
 
-  // Tap tempo: BPM from the mean of the last few tap intervals.
   private tapTimes: number[] = [];
   protected tappedBpm = signal<number | null>(null);
 
@@ -156,6 +162,7 @@ export class WorkspaceComponent {
     if (next === p.workingBpm) return;
     await this.store.updatePart(p.id, {
       title: p.title,
+      goalBpm: p.goalBpm,
       workingBpm: next,
       totalBars: p.totalBars,
     });
