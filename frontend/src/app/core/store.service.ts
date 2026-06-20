@@ -2,6 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './api.service';
 import { Folder, Part, Song, SongUpsert, FolderUpsert, PartUpsert } from './models';
+import { avgWorkingBpm } from './derive';
 
 // Special folder ids used by the UI sidebar.
 export const ALL_SONGS = '__all__';
@@ -110,7 +111,7 @@ export class Store {
   async createPart(songId: string, body: PartUpsert) {
     const p = await firstValueFrom(this.api.createPart(songId, body));
     this.parts.update(list => [...list, p]);
-    this.bumpSongCounts(songId);
+    this.refreshSongCountsFor(songId);
     this.selectPart(p.id);
   }
   async updatePart(id: string, body: PartUpsert) {
@@ -138,17 +139,13 @@ export class Store {
     this.refreshSongCountsFor(p.songId);
   }
 
-  private bumpSongCounts(songId: string) {
-    this.songs.update(list => list.map(s => s.id === songId
-      ? { ...s, partCount: s.partCount + 1 }
-      : s));
-  }
-
   private refreshSongCountsFor(songId: string) {
-    const total = this.parts().filter(p => p.songId === songId).length;
-    const learnt = this.parts().filter(p => p.songId === songId && p.learntState === 'LEARNT').length;
+    const songParts = this.parts().filter(p => p.songId === songId);
+    const total = songParts.length;
+    const learnt = songParts.filter(p => p.learntState === 'LEARNT').length;
+    const avg = avgWorkingBpm(songParts);
     this.songs.update(list => list.map(s => s.id === songId
-      ? { ...s, partCount: total, learntPartCount: learnt }
+      ? { ...s, partCount: total, learntPartCount: learnt, avgBpm: avg }
       : s));
   }
 }
