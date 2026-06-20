@@ -17,3 +17,8 @@ export function countLearntParts(parts: { totalBars: number; learntBars: number 
 export function nextPosition(existingCount: number): number {
   return existingCount;
 }
+
+export function avgWorkingBpm(parts: { workingBpm: number }[]): number | null {
+  if (!parts.length) return null;
+  return Math.round(parts.reduce((sum, p) => sum + p.workingBpm, 0) / parts.length);
+}

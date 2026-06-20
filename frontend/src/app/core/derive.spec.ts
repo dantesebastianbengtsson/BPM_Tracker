@@ -1,4 +1,4 @@
-import { learntStateOf, clampLearntBars, countLearntParts, nextPosition } from './derive';
+import { learntStateOf, clampLearntBars, countLearntParts, nextPosition, avgWorkingBpm } from './derive';
 
 describe('learntStateOf', () => {
   it('is UNLEARNT when no bars learnt', () => {
@@ -46,5 +46,20 @@ describe('nextPosition', () => {
   it('returns the count of existing siblings', () => {
     expect(nextPosition(3)).toBe(3);
     expect(nextPosition(0)).toBe(0);
+  });
+});
+
+describe('avgWorkingBpm', () => {
+  it('returns null when parts array is empty', () => {
+    expect(avgWorkingBpm([])).toBeNull();
+  });
+  it('returns the single value when there is one part', () => {
+    expect(avgWorkingBpm([{ workingBpm: 90 }])).toBe(90);
+  });
+  it('returns the rounded mean of multiple parts', () => {
+    expect(avgWorkingBpm([{ workingBpm: 80 }, { workingBpm: 90 }, { workingBpm: 85 }])).toBe(85);
+  });
+  it('rounds 0.5 up', () => {
+    expect(avgWorkingBpm([{ workingBpm: 80 }, { workingBpm: 81 }])).toBe(81);
   });
 });
