@@ -7,7 +7,7 @@ import {
 } from './models';
 import { FolderRow, SongRow, PartRow } from './db-types';
 import { toFolder, toSong, toPart } from './mappers';
-import { clampLearntBars, countLearntParts, nextPosition } from './derive';
+import { clampLearntBars, countLearntParts, nextPosition, avgWorkingBpm } from './derive';
 import { SUPABASE } from './supabase.client';
 
 @Injectable({ providedIn: 'root' })
@@ -72,15 +72,16 @@ export class ApiService {
     const songRows = (songs ?? []) as SongRow[];
 
     const { data: parts, error: partErr } = await this.sb
-      .from('parts').select('song_id, total_bars, learnt_bars');
+      .from('parts').select('song_id, total_bars, learnt_bars, working_bpm');
     if (partErr) throw partErr;
-    const partRows = (parts ?? []) as { song_id: string; total_bars: number; learnt_bars: number }[];
+    const partRows = (parts ?? []) as {
+      song_id: string; total_bars: number; learnt_bars: number; working_bpm: number;
+    }[];
 
     return songRows.map(s => {
-      const own = partRows
-        .filter(p => p.song_id === s.id)
-        .map(p => ({ totalBars: p.total_bars, learntBars: p.learnt_bars }));
-      return toSong(s, own.length, countLearntParts(own));
+      const own = partRows.filter(p => p.song_id === s.id)
+        .map(p => ({ totalBars: p.total_bars, learntBars: p.learnt_bars, workingBpm: p.working_bpm }));
+      return toSong(s, own.length, countLearntParts(own), avgWorkingBpm(own));
     });
   }
 
@@ -92,28 +93,36 @@ export class ApiService {
       .from('songs')
       .insert({
         title: body.title.trim(),
-        goal_bpm: body.goalBpm,
+        artist: body.artist ?? null,
+        album: body.album ?? null,
+        key: body.key ?? null,
         folder_id: body.folderId,
         position: nextPosition(count ?? 0),
       })
       .select().single();
     if (error) throw error;
-    return toSong(data as SongRow, 0, 0);
+    return toSong(data as SongRow, 0, 0, null);
   }
 
   updateSong(id: string, body: SongUpsert): Observable<Song> { return from(this.patchSong(id, body)); }
   private async patchSong(id: string, body: SongUpsert): Promise<Song> {
     const { data, error } = await this.sb
       .from('songs')
-      .update({ title: body.title.trim(), goal_bpm: body.goalBpm, folder_id: body.folderId })
+      .update({
+        title: body.title.trim(),
+        artist: body.artist ?? null,
+        album: body.album ?? null,
+        key: body.key ?? null,
+        folder_id: body.folderId,
+      })
       .eq('id', id).select().single();
     if (error) throw error;
     const { data: parts, error: partErr } = await this.sb
-      .from('parts').select('total_bars, learnt_bars').eq('song_id', id);
+      .from('parts').select('total_bars, learnt_bars, working_bpm').eq('song_id', id);
     if (partErr) throw partErr;
-    const own = ((parts ?? []) as { total_bars: number; learnt_bars: number }[])
-      .map(p => ({ totalBars: p.total_bars, learntBars: p.learnt_bars }));
-    return toSong(data as SongRow, own.length, countLearntParts(own));
+    const own = ((parts ?? []) as { total_bars: number; learnt_bars: number; working_bpm: number }[])
+      .map(p => ({ totalBars: p.total_bars, learntBars: p.learnt_bars, workingBpm: p.working_bpm }));
+    return toSong(data as SongRow, own.length, countLearntParts(own), avgWorkingBpm(own));
   }
 
   deleteSong(id: string): Observable<void> { return from(this.removeSong(id)); }
@@ -141,6 +150,7 @@ export class ApiService {
       .insert({
         song_id: songId,
         title: body.title.trim(),
+        goal_bpm: body.goalBpm,
         working_bpm: body.workingBpm,
         total_bars: body.totalBars,
         learnt_bars: 0,
@@ -161,6 +171,7 @@ export class ApiService {
       .from('parts')
       .update({
         title: body.title.trim(),
+        goal_bpm: body.goalBpm,
         working_bpm: body.workingBpm,
         total_bars: body.totalBars,
         learnt_bars: learnt,
