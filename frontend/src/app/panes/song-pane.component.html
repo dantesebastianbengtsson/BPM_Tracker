@@ -1,4 +1,10 @@
-<div class="strip" aria-hidden="true">
+<div class="strip"
+     role="button"
+     tabindex="0"
+     aria-label="Open song list"
+     (click)="openList()"
+     (keydown.enter)="openList()"
+     (keydown.space)="openList(); $event.preventDefault()">
   <app-icon name="music" size="16" weight="1.8"></app-icon>
   <span class="strip-title">{{ store.selectedSong()?.title ?? headerLabel() }}</span>
   <app-icon name="chevron" size="13" weight="2"></app-icon>
@@ -72,7 +78,7 @@
     @for (s of store.visibleSongs(); track s.id) {
       <li class="song-card"
           [class.active]="store.selectedSongId() === s.id"
-          (click)="store.selectSong(s.id)">
+          (click)="selectSong(s.id)">
 
         @if (editingId() === s.id) {
           <div class="edit-block" (click)="$event.stopPropagation()">

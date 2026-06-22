@@ -27,7 +27,18 @@ export class SongPaneComponent {
   protected editAlbum = signal('');
   protected editKey = signal('');
 
-  protected collapsed = computed(() => this.store.selectedSongId() !== null);
+  // The list stays open (persistent) until a song is clicked; clicking the
+  // collapsed strip re-opens it. No hover involved.
+  protected listOpen = signal(true);
+  protected collapsed = computed(() => !this.listOpen() && this.store.selectedSongId() !== null);
+
+  /** Pick a song: show it on the main screen and collapse the list. */
+  selectSong(id: string) {
+    this.store.selectSong(id);
+    this.listOpen.set(false);
+  }
+  /** Re-open the list from the collapsed strip. */
+  openList() { this.listOpen.set(true); }
 
   protected headerLabel = computed(() => {
     const fid = this.store.selectedFolderId();
