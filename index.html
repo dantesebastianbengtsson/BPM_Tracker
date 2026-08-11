@@ -4,115 +4,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bpm tracker</title>
+    <title>BPM Tracker</title>
     <link rel="icon" type="image/png" href="Logo.png">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <header>
+    <header class="top-bar">
         <div class="brand">
             <img src="Logo.png" alt="BPM Tracker logo" class="logo">
             <div>
                 <h1>BPM Tracker</h1>
-                <p>Track each song part and keep your metronome in sync.</p>
+                <p>Practice songs with tabs, BPM and learnt markers.</p>
             </div>
         </div>
     </header>
 
-    <main class="app-container">
-        <section class="sidebar">
-            <div class="section-header">
-                <h2>Songs</h2>
-                <button id="add-song-button" class="primary">Add Song</button>
-            </div>
-            <form id="song-form" class="inline-form hidden">
-                <input type="hidden" id="song-id">
-                <label>
-                    Name
-                    <input type="text" id="song-name" required>
-                </label>
-                <label>
-                    Notes
-                    <textarea id="song-notes" rows="2" placeholder="Optional"></textarea>
-                </label>
-                <div class="form-actions">
-                    <button type="submit" class="primary" id="save-song">Save</button>
-                    <button type="button" id="cancel-song">Cancel</button>
+    <main class="layout">
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Songs</h2>
+                    <button id="new-song" class="primary">New Song</button>
                 </div>
-            </form>
-            <ul id="song-list"></ul>
-        </section>
-
-        <section class="main-pane">
-            <section id="metronome">
-                <div class="section-header">
-                    <h2>Metronome</h2>
-                    <span id="active-part-label">No part selected</span>
-                </div>
-                <div class="metronome-controls">
-                    <button id="bpm-minus">-5</button>
-                    <input type="number" id="metronome-bpm" min="20" max="300" step="1" readonly>
-                    <button id="bpm-plus">+5</button>
-                    <button id="metronome-toggle" class="primary">Play</button>
-                    <div id="metronome-indicator" aria-label="Metronome beat"></div>
-                </div>
-            </section>
-
-            <section id="song-details">
-                <div class="section-header">
-                    <div>
-                        <h2 id="detail-name">Select a song</h2>
-                        <p id="detail-notes" class="notes"></p>
-                    </div>
-                    <div class="section-actions">
-                        <button id="edit-song-button">Edit Song</button>
-                        <button id="delete-song-button" class="danger">Delete Song</button>
-                    </div>
-                </div>
-
-                <div class="parts-header">
-                    <h3>Parts</h3>
-                    <button id="add-part-button" class="primary">Add Part</button>
-                </div>
-                <form id="part-form" class="inline-form hidden">
-                    <input type="hidden" id="part-id">
+                <form id="song-form" class="stacked-form hidden">
+                    <input type="hidden" id="song-id">
                     <label>
-                        Name
-                        <input type="text" id="part-name" required>
+                        Title
+                        <input type="text" id="song-title" required>
                     </label>
-                    <div class="form-row">
-                        <label>
-                            Current BPM
-                            <input type="number" id="part-current-bpm" min="20" max="300" required>
-                        </label>
-                        <label>
-                            Target BPM
-                            <input type="number" id="part-target-bpm" min="20" max="300" required>
-                        </label>
-                    </div>
-                    <div class="form-row">
-                        <label>
-                            Total Bars
-                            <input type="number" id="part-total-bars" min="1" max="64" required>
-                        </label>
-                        <label>
-                            Learnt Bars
-                            <input type="number" id="part-learnt-bars" min="0" max="64" required>
-                        </label>
-                    </div>
                     <label>
-                        Comment
-                        <textarea id="part-comment" rows="2" placeholder="Optional thoughts"></textarea>
+                        Goal BPM
+                        <input type="number" id="song-goal" min="20" max="260" value="82" required>
                     </label>
                     <div class="form-actions">
-                        <button type="submit" class="primary" id="save-part">Save Part</button>
+                        <button type="submit" class="primary">Save</button>
+                        <button type="button" id="cancel-song">Cancel</button>
+                    </div>
+                </form>
+                <ul id="song-list" class="list"></ul>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Parts</h3>
+                    <div class="inline-actions">
+                        <select id="learnt-filter">
+                            <option value="all">All</option>
+                            <option value="unlearnt">Unlearnt</option>
+                            <option value="learning">Learning</option>
+                            <option value="learnt">Learnt</option>
+                        </select>
+                        <button id="new-part" class="primary">New Part</button>
+                    </div>
+                </div>
+                <form id="part-form" class="stacked-form hidden">
+                    <input type="hidden" id="part-id">
+                    <label>
+                        Title
+                        <input type="text" id="part-title" required>
+                    </label>
+                    <label>
+                        Working BPM
+                        <input type="number" id="part-bpm" min="20" max="260" required>
+                    </label>
+                    <div class="form-actions">
+                        <button type="submit" class="primary">Save</button>
                         <button type="button" id="cancel-part">Cancel</button>
                     </div>
                 </form>
+                <ul id="part-list" class="list"></ul>
+            </div>
+        </aside>
 
-                <div id="part-list"></div>
-            </section>
+        <section class="main">
+            <div class="breadcrumb" id="breadcrumb">Select a song to begin</div>
+
+            <div class="controls-card">
+                <div class="bpm-block card">
+                    <div class="card-header">
+                        <h3>Metronome</h3>
+                        <span id="learnt-badge" class="learnt-badge">State: -</span>
+                    </div>
+                    <div class="bpm-row">
+                        <button id="bpm-down">-5</button>
+                        <input type="number" id="bpm-display" min="20" max="260">
+                        <button id="bpm-up">+5</button>
+                        <button id="metronome-toggle" class="primary">Play</button>
+                        <div id="metronome-indicator" aria-label="metronome light"></div>
+                    </div>
+                </div>
+                <div class="learnt-block card">
+                    <label for="learnt-state">Learnt state</label>
+                    <select id="learnt-state">
+                        <option value="unlearnt">Unlearnt</option>
+                        <option value="learning">Learning</option>
+                        <option value="learnt">Learnt</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card playback-card">
+                <div class="card-header">
+                    <h3>Tab Playback</h3>
+                </div>
+                <div class="playback-row">
+                    <button id="play-tab" class="primary">Play Tab</button>
+                    <button id="stop-tab">Stop</button>
+                    <label><input type="checkbox" id="loop-tab"> Loop</label>
+                    <label><input type="checkbox" id="click-during-play"> Metronome</label>
+                </div>
+            </div>
+
+            <div class="card tab-panel">
+                <div class="bar-toolbar">
+                    <h3>Tab Bars</h3>
+                    <div class="inline-actions">
+                        <button id="add-bar" class="primary">Add Bar</button>
+                        <button id="duplicate-last">Duplicate last</button>
+                        <button id="clear-bars" class="danger">Clear all</button>
+                    </div>
+                </div>
+                <div id="bars-container" class="bars-container"></div>
+            </div>
         </section>
     </main>
 

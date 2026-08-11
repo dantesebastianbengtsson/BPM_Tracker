@@ -1,0 +1,165 @@
+<div class="strip"
+     role="button"
+     tabindex="0"
+     aria-label="Open song list"
+     (click)="openList()"
+     (keydown.enter)="openList()"
+     (keydown.space)="openList(); $event.preventDefault()">
+  <app-icon name="music" size="16" weight="1.8"></app-icon>
+  <span class="strip-title">{{ store.selectedSong()?.title ?? headerLabel() }}</span>
+  <app-icon name="chevron" size="13" weight="2"></app-icon>
+</div>
+
+<section class="pane">
+  <header class="pane-head">
+    <div class="pane-head-text">
+      <p class="pane-eyebrow">Library</p>
+      <h2 class="pane-title">{{ headerLabel() }}</h2>
+    </div>
+    <button class="action"
+            type="button"
+            (click)="startCreate()">
+      <app-icon name="plus" size="14" weight="2"></app-icon>
+      <span>New song</span>
+    </button>
+  </header>
+
+  <div class="search-row">
+    <input class="search-input"
+           type="search"
+           placeholder="Search songs"
+           aria-label="Search songs"
+           [ngModel]="store.songQuery()"
+           (ngModelChange)="store.songQuery.set($event)" />
+    @if (store.songQuery()) {
+      <button class="search-clear" type="button" (click)="store.songQuery.set('')" aria-label="Clear search">×</button>
+    }
+  </div>
+
+  <ul class="song-list">
+    @if (creating()) {
+      <li class="song-card creating">
+        <input id="new-song-title"
+               class="song-title-input"
+               [ngModel]="newTitle()"
+               (ngModelChange)="newTitle.set($event)"
+               placeholder="Song title"
+               (keydown.enter)="commitCreate()"
+               (keydown.escape)="cancelCreate()" />
+        <div class="song-fields">
+          <div class="field-row">
+            <label class="text-field">
+              <span>Artist</span>
+              <input type="text"
+                     [ngModel]="newArtist()"
+                     (ngModelChange)="newArtist.set($event)" />
+            </label>
+            <label class="text-field key-field">
+              <span>Key</span>
+              <input type="text" maxlength="8"
+                     [ngModel]="newKey()"
+                     (ngModelChange)="newKey.set($event)" />
+            </label>
+          </div>
+          <label class="text-field">
+            <span>Album</span>
+            <input type="text"
+                   [ngModel]="newAlbum()"
+                   (ngModelChange)="newAlbum.set($event)" />
+          </label>
+          <div class="card-actions">
+            <button class="ghost" type="button" (click)="cancelCreate()">Cancel</button>
+            <button class="primary" type="button" (click)="commitCreate()">Add song</button>
+          </div>
+        </div>
+      </li>
+    }
+
+    @for (s of store.visibleSongs(); track s.id) {
+      <li class="song-card"
+          [class.active]="store.selectedSongId() === s.id"
+          (click)="selectSong(s.id)">
+
+        @if (editingId() === s.id) {
+          <div class="edit-block" (click)="$event.stopPropagation()">
+            <input class="song-title-input"
+                   [ngModel]="editTitle()"
+                   (ngModelChange)="editTitle.set($event)"
+                   (keydown.enter)="commitEdit(s)"
+                   (keydown.escape)="cancelEdit()" />
+            <div class="song-fields">
+              <div class="field-row">
+                <label class="text-field">
+                  <span>Artist</span>
+                  <input type="text"
+                         [ngModel]="editArtist()"
+                         (ngModelChange)="editArtist.set($event)" />
+                </label>
+                <label class="text-field key-field">
+                  <span>Key</span>
+                  <input type="text" maxlength="8"
+                         [ngModel]="editKey()"
+                         (ngModelChange)="editKey.set($event)" />
+                </label>
+              </div>
+              <label class="text-field">
+                <span>Album</span>
+                <input type="text"
+                       [ngModel]="editAlbum()"
+                       (ngModelChange)="editAlbum.set($event)" />
+              </label>
+              <div class="card-actions">
+                <button class="ghost" type="button" (click)="cancelEdit()">Cancel</button>
+                <button class="primary" type="button" (click)="commitEdit(s)">Save</button>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="song-head">
+            <div class="song-info">
+              <div class="song-title-row">
+                <p class="song-title">{{ s.title }}</p>
+                @if (s.artist) {
+                  <span class="song-artist">{{ s.artist }}</span>
+                }
+              </div>
+              @if (s.key) {
+                <p class="song-key">{{ s.key }}</p>
+              }
+              <p class="song-sub">
+                <span class="bpm-pill">{{ s.avgBpm !== null ? s.avgBpm + ' BPM' : '— BPM' }}</span>
+                <span class="dot">·</span>
+                <span>{{ s.learntPartCount }}/{{ s.partCount }} parts learnt</span>
+              </p>
+            </div>
+            <div class="row-actions">
+              <button class="row-action" type="button" (click)="startEdit(s, $event)" aria-label="Edit song">
+                <app-icon name="edit" size="13"></app-icon>
+              </button>
+              <button class="row-action danger" type="button" (click)="remove(s.id, $event)" aria-label="Delete song">
+                <app-icon name="trash" size="13"></app-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="song-progress" [class.empty]="s.partCount === 0">
+            <span class="song-progress-bar" [style.--p]="progress(s)"></span>
+          </div>
+        }
+      </li>
+    }
+
+    @if (!store.visibleSongs().length && !creating()) {
+      <li class="empty-card">
+        <app-icon name="music" size="22" weight="1.4"></app-icon>
+        @if (store.songQuery()) {
+          <p class="empty-title">No songs match</p>
+          <p class="empty-sub">Try a different search, or clear it.</p>
+        } @else {
+          <p class="empty-title">No songs here yet</p>
+          <p class="empty-sub">Use <strong>New song</strong> above to add one.</p>
+        }
+      </li>
+    }
+  </ul>
+</section>

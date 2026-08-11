@@ -1,0 +1,210 @@
+<section class="workspace">
+  @if (!song()) {
+    <div class="empty-state">
+      <app-icon name="spark" size="28" weight="1.4"></app-icon>
+      <h2>Pick a song to start practising</h2>
+      <p>Choose one from the library, or create a new one. Each song breaks down into parts you can drill at their own BPM.</p>
+    </div>
+  } @else {
+    <header class="workspace-head">
+      <div>
+        <p class="breadcrumb">{{ song()!.title }}</p>
+        <h1 class="part-title">
+          {{ part()?.title ?? 'Add a part to start' }}
+        </h1>
+      </div>
+      @if (part()) {
+        <span class="state-chip" [class]="stateClass(part()!)">{{ stateLabel() }}</span>
+      }
+    </header>
+
+    <div class="workspace-body">
+      <aside class="parts-list">
+        @for (p of store.parts(); track p.id) {
+          <button class="part-card"
+                  type="button"
+                  [class.active]="store.selectedPartId() === p.id"
+                  (click)="selectPart(p.id)">
+            <span class="part-pill" [class]="stateClass(p)" aria-hidden="true"></span>
+            <span class="part-card-text">
+              <span class="part-card-title">{{ p.title }}</span>
+              <span class="part-card-sub">
+                {{ p.learntBars }}/{{ p.totalBars }} bars · {{ p.workingBpm }} BPM
+              </span>
+            </span>
+          </button>
+        }
+
+        @if (!store.parts().length && !creatingPart()) {
+          <div class="empty-parts">
+            <p>No parts yet for this song.</p>
+          </div>
+        }
+
+        @if (creatingPart()) {
+          <div class="part-card creating">
+            <input id="new-part-title"
+                   class="part-title-input"
+                   placeholder="Part title"
+                   [ngModel]="newPartTitle()"
+                   (ngModelChange)="newPartTitle.set($event)"
+                   (keydown.enter)="commitCreatePart()"
+                   (keydown.escape)="cancelCreatePart()" />
+            <label class="inline-field">
+              <span>Bars</span>
+              <input type="number" min="1" max="999"
+                     [ngModel]="newPartBars()"
+                     (ngModelChange)="newPartBars.set($event)" />
+            </label>
+            <label class="inline-field">
+              <span>Goal BPM</span>
+              <input type="number" min="20" max="260"
+                     [ngModel]="newPartGoalBpm()"
+                     (ngModelChange)="newPartGoalBpm.set($event)" />
+            </label>
+            <div class="card-actions">
+              <button class="ghost" type="button" (click)="cancelCreatePart()">Cancel</button>
+              <button class="primary" type="button" (click)="commitCreatePart()">Add</button>
+            </div>
+          </div>
+        } @else {
+          <button class="add-part" type="button" (click)="startCreatePart()">
+            <app-icon name="plus" size="14" weight="2"></app-icon>
+            <span>New part</span>
+          </button>
+        }
+      </aside>
+
+      @if (part(); as p) {
+        <div class="hero">
+          <section class="flow flow-bars">
+            <p class="flow-eyebrow">Bars learnt</p>
+
+            <div class="bars-display">
+              <button class="round-btn"
+                      type="button"
+                      (click)="adjustBars(-1)"
+                      [disabled]="p.learntBars <= 0"
+                      aria-label="Decrease learnt bars">
+                <app-icon name="minus" size="20" weight="2.4"></app-icon>
+              </button>
+
+              <div class="bars-number">
+                <span class="bars-current">{{ p.learntBars }}</span>
+                <span class="bars-divider">/</span>
+                <span class="bars-total">{{ p.totalBars }}</span>
+              </div>
+
+              <button class="round-btn primary"
+                      type="button"
+                      (click)="adjustBars(1)"
+                      [disabled]="p.learntBars >= p.totalBars"
+                      aria-label="Increase learnt bars">
+                <app-icon name="plus" size="20" weight="2.4"></app-icon>
+              </button>
+            </div>
+
+            <div class="bars-track">
+              <span class="bars-track-fill" [style.--p]="progress()"></span>
+            </div>
+
+            <p class="bars-foot">
+              {{ p.totalBars === 0 ? 'Set total bars in Edit' :
+                 p.learntBars >= p.totalBars ? 'All bars learnt — well done.' :
+                 'Click + each time you nail another bar.' }}
+            </p>
+
+            <div class="bars-quick">
+              @if (p.learntBars < p.totalBars) {
+                <button class="ghost" type="button" (click)="markAllLearnt()">Mark all learnt</button>
+              }
+              @if (p.learntBars > 0) {
+                <button class="ghost" type="button" (click)="resetLearnt()">Reset</button>
+              }
+            </div>
+          </section>
+
+          <div class="flow-divider" aria-hidden="true"></div>
+
+          <section class="flow flow-tempo">
+            <p class="flow-eyebrow">
+              <span>Working BPM</span>
+              <span class="indicator" [class.active]="metronome.tickCount() % 2 === 1 && metronome.running()"></span>
+            </p>
+
+            <div class="bpm-row">
+              <button class="step" type="button" (click)="adjustBpm(-5)" aria-label="Decrease BPM by 5">−5</button>
+              <input type="number"
+                     class="bpm-input"
+                     min="20" max="260"
+                     [ngModel]="p.workingBpm"
+                     (ngModelChange)="setBpmInput($event)" />
+              <button class="step" type="button" (click)="adjustBpm(5)" aria-label="Increase BPM by 5">+5</button>
+            </div>
+
+            <div class="tempo-actions">
+              <button class="play-btn"
+                      type="button"
+                      [class.playing]="metronome.running()"
+                      (click)="toggleMetronome()">
+                <app-icon [name]="metronome.running() ? 'pause' : 'play'" size="18" weight="0"></app-icon>
+                <span>{{ metronome.running() ? 'Stop metronome' : 'Start metronome' }}</span>
+              </button>
+              <button class="tap-btn" type="button" (click)="tapTempo()" aria-label="Tap tempo">
+                {{ tappedBpm() ? 'Tap · ' + tappedBpm() : 'Tap tempo' }}
+              </button>
+            </div>
+
+            <p class="bpm-foot">Goal {{ p.goalBpm }} BPM
+              · {{ p.workingBpm >= p.goalBpm ? 'At goal' : 'Below goal by ' + (p.goalBpm - p.workingBpm) + ' BPM' }}
+            </p>
+          </section>
+
+          <section class="flow flow-meta">
+            @if (editing()) {
+              <div class="edit-grid">
+                <label class="stacked-field">
+                  <span>Title</span>
+                  <input [ngModel]="editTitle()" (ngModelChange)="editTitle.set($event)" />
+                </label>
+                <label class="stacked-field">
+                  <span>Total bars</span>
+                  <input type="number" min="1" max="999"
+                         [ngModel]="editTotal()"
+                         (ngModelChange)="editTotal.set($event)" />
+                </label>
+                <label class="stacked-field">
+                  <span>Goal BPM</span>
+                  <input type="number" min="20" max="260"
+                         [ngModel]="editGoalBpm()"
+                         (ngModelChange)="editGoalBpm.set($event)" />
+                </label>
+                <div class="card-actions">
+                  <button class="ghost" type="button" (click)="cancelEditPart()">Cancel</button>
+                  <button class="primary" type="button" (click)="commitEditPart()">Save</button>
+                </div>
+              </div>
+            } @else {
+              <div class="meta-actions">
+                <button class="ghost" type="button" (click)="startEditPart()">
+                  <app-icon name="edit" size="13"></app-icon>
+                  <span>Edit part</span>
+                </button>
+                <button class="ghost danger" type="button" (click)="removePart()">
+                  <app-icon name="trash" size="13"></app-icon>
+                  <span>Delete part</span>
+                </button>
+              </div>
+            }
+          </section>
+        </div>
+      } @else {
+        <div class="hero hero-empty">
+          <app-icon name="music" size="24" weight="1.4"></app-icon>
+          <p class="hero-empty-title">No part selected</p>
+          <p class="hero-empty-sub">Add the first part of <strong>{{ song()!.title }}</strong> from the list on the left.</p>
+        </div>
+      }
+    </div>
+  }
+</section>
