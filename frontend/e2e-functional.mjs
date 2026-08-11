@@ -70,7 +70,10 @@ await step('create song via Unfiled (fallback path)', async () => {
     await page.waitForSelector('#new-song-title', { timeout: 3000 });
   }
   await page.fill('#new-song-title', 'My First Song');
-  await page.locator('.song-card.creating input[type="number"]').fill('120');
+  // goal BPM moved from songs to parts — the create-song form has no number
+  // input any more, only the Artist/Key/Album metadata fields.
+  await page.locator('.song-card.creating .text-field', { hasText: 'Artist' })
+    .locator('input').fill('The Strokes');
   await page.click('.song-card.creating .primary');
   await page.waitForSelector('.song-card:not(.creating) .song-title', { timeout: 8000 });
   const title = await page.locator('.song-title').first().textContent();
