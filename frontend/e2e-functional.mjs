@@ -31,10 +31,14 @@ page.on('console', m => {
 
 console.log(`Running against ${BASE} as ${email}\n`);
 
-// The library collapses to a strip once a song is selected; hovering expands it.
+// The library collapses to a strip once a song is selected. The strip is
+// re-opened by CLICKING it — see song-pane.component.ts ("No hover involved").
 async function openLibrary() {
-  await page.hover('app-song-pane');
-  await page.waitForTimeout(650); // spring transition
+  const pane = page.locator('app-song-pane');
+  if (await pane.evaluate(el => el.classList.contains('collapsed')).catch(() => false)) {
+    await pane.locator('.strip').click();
+    await page.waitForTimeout(650); // spring transition
+  }
 }
 
 await step('signup: fresh account lands in app', async () => {
@@ -89,7 +93,11 @@ await step('song is auto-selected, workspace shows it', async () => {
 await step('add first part', async () => {
   await page.locator('.add-part').click();
   await page.fill('#new-part-title', 'Verse');
-  await page.locator('.part-card.creating input[type="number"]').fill('16');
+  // the part form has two number inputs — Bars and Goal BPM — so target by label
+  await page.locator('.part-card.creating .inline-field', { hasText: 'Bars' })
+    .locator('input').fill('16');
+  await page.locator('.part-card.creating .inline-field', { hasText: 'Goal BPM' })
+    .locator('input').fill('120');
   await page.locator('.part-card.creating .primary').click();
   await page.waitForSelector('.part-card:not(.creating)', { timeout: 8000 });
   const txt = await page.locator('.part-card:not(.creating)').first().textContent();
@@ -146,10 +154,10 @@ await step('delete a part', async () => {
 });
 
 await step('create folder and song inside it', async () => {
-  await page.locator('app-folder-rail button', { hasText: '+' }).first().click().catch(async () => {
-    await page.locator('.folders .add, [aria-label*="folder" i]').first().click();
-  });
-  const input = page.locator('app-folder-rail input').first();
+  // the add-folder control is an icon button, not a "+" label
+  await page.locator('app-folder-rail .rail-add').click();
+  const input = page.locator('#new-folder-input');
+  await input.waitFor({ timeout: 5000 });
   await input.fill('Practice Set');
   await input.press('Enter');
   await page.waitForTimeout(800);
